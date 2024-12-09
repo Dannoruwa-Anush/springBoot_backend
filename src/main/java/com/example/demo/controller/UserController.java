@@ -6,83 +6,46 @@ import java.util.NoSuchElementException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.entity.User;
 import com.example.demo.service.UserService;
 
 @RestController
-@RequestMapping("/users") //serve entire controller under users url 
+@RequestMapping("/users") //set table name
 public class UserController {
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
+    // Get all users
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.getAllUsers());
+        List<User> users = userService.getAllUsers();
+        return ResponseEntity.ok(users);
     }
-    // ---
 
+    // Get user by ID
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable long id) {
+    public ResponseEntity<?> getUserById(@PathVariable long id) {
         try {
-            // Try to find user by id
             User user = userService.getUserById(id);
-            return ResponseEntity.status(HttpStatus.OK).body(user);
-
+            return ResponseEntity.ok(user);
         } catch (NoSuchElementException e) {
-            // If there is no user by id, throw NoSuchElementException from
-            // UserServiceIml.java
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found with ID: " + id);
         }
     }
-    // ---
-
-    @PostMapping
-    public ResponseEntity<User> saveUser(@RequestBody User user) {
-        try {
-            // Try to find user by id
-            User userControll = userService.saveUser(user);
-            return ResponseEntity.status(HttpStatus.CREATED).body(userControll);
-
-        } catch (NoSuchElementException e) {
-            // If there is no user by id, throw NoSuchElementException from
-            // UserServiceIml.java
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
-    }
-    // ---
-
+    
+    // Update user by ID
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable long id, @RequestBody User user) {
+    public ResponseEntity<?> updateUser(@PathVariable long id, @RequestBody User user) {
         try {
-            User updateUser = userService.updateUser(id, user);
-            return ResponseEntity.status(HttpStatus.OK).body(updateUser);
+            User updatedUser = userService.updateUser(id, user);
+            return ResponseEntity.ok(updatedUser);
         } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found with ID: " + id);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating user: " + e.getMessage());
         }
     }
-    // ---
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable long id) {
-        try {
-            userService.deleteUser(id);
-            return ResponseEntity.status(HttpStatus.OK).body(null);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
-
-    }
-    // ---
 }
