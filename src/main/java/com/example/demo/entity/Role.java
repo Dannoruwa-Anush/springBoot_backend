@@ -27,7 +27,7 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY) //generate the primary key value by the database itself using the auto-increment column option
     private Long id; //primary key
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String roleName;
 
     //User (Many) ---  (Many) Role
