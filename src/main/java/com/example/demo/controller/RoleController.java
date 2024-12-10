@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dto.RoleDTO;
+import com.example.demo.dto.request.RoleRequestDTO;
+import com.example.demo.dto.responce.RoleResponseDTO;
 import com.example.demo.entity.Role;
 import com.example.demo.service.RoleService;
 
@@ -40,6 +42,14 @@ public class RoleController {
         role.setRoleName(dto.getRoleName());
         return role;
     }
+
+    private RoleResponseDTO toRoleResponseDTO(Role role){
+        RoleResponseDTO responseDto = new RoleResponseDTO();
+        responseDto.setRoleId(role.getId());
+        responseDto.setRoleName(role.getRoleName());
+        responseDto.setUserPermissions(role.getUserPermissions());
+        return responseDto;
+    } 
 
     @GetMapping
     public ResponseEntity<List<RoleDTO>> getAllRoles() {
@@ -89,6 +99,39 @@ public class RoleController {
             return ResponseEntity.status(HttpStatus.OK).build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    //-- APIs related to role - userPermission Assignment
+    @PostMapping("saveOrUpdateRoleWithPermissions")
+    public ResponseEntity<RoleResponseDTO> saveOrUpdateRoleWithPermissions(@RequestBody RoleRequestDTO roleRequest) {
+        try {
+            Role createdRole = roleService.saveOrUpdateRoleWithPermissions(roleRequest);
+            return ResponseEntity.status(HttpStatus.CREATED).body(toRoleResponseDTO(createdRole));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    @PostMapping("addPermissionsToExistingRole")
+    public ResponseEntity<RoleResponseDTO> addPermissionsToExistingRole(@RequestBody RoleRequestDTO roleRequest) {
+        try {
+            Role createdRole = roleService.addPermissionsToExistingRole(roleRequest);
+            return ResponseEntity.status(HttpStatus.CREATED).body(toRoleResponseDTO(createdRole));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    @PostMapping("removePermissionsFromExistingRole")
+    public ResponseEntity<RoleResponseDTO> removePermissionsFromExistingRole(@RequestBody RoleRequestDTO roleRequest) {
+        try {
+            Role createdRole = roleService.removePermissionsFromExistingRole(roleRequest);
+            return ResponseEntity.status(HttpStatus.CREATED).body(toRoleResponseDTO(createdRole));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 }

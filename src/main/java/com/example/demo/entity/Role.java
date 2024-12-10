@@ -1,6 +1,9 @@
 package com.example.demo.entity;
 
+import java.util.Objects;
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,6 +36,7 @@ public class Role {
     //User (Many) ---  (Many) Role
     //Role side relationship
     @ManyToMany(mappedBy = "roles") //roles -> variable "private Set<Role> roles;" in the User.java
+    @JsonIgnore //prevent this property from being included in the JSON output.
     private Set<User> users;
 
     //Role (Many) ---  (Many) UserPermission
@@ -43,7 +47,41 @@ public class Role {
         joinColumns = @JoinColumn(name = "role_id"),
         inverseJoinColumns = @JoinColumn(name = "userPermission_id")
     )
+    @JsonIgnore //prevent this property from being included in the JSON output.
     private Set<UserPermission> userPermissions;
     //EAGER : When You Always Need the Related Data
     //LAZY  : When You Avoid Unnecessary Data Loading
+
+    // List is an ordered collection that allows duplicate elements.
+    
+    // Set is an unordered collection that does not allow duplicate elements
+
+    // HashSet uses a hash table to store the elements, making it efficient for
+    // operations
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Role role = (Role) obj;
+        return Objects.equals(id, role.id);
+    }
 }
