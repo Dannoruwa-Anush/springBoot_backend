@@ -1,4 +1,4 @@
-package com.example.demo.dto.responce;
+package com.example.demo.dto.response;
 
 import java.util.Set;
 

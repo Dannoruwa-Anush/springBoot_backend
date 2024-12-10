@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.dto.RoleDTO;
 import com.example.demo.dto.request.RoleRequestDTO;
-import com.example.demo.dto.responce.RoleResponseDTO;
+import com.example.demo.dto.response.RoleDTO;
+import com.example.demo.dto.response.RoleResponseDTO;
 import com.example.demo.entity.Role;
 import com.example.demo.service.RoleService;
 
