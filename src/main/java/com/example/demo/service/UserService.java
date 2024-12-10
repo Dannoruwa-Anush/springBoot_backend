@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.request.UserPaswordResetRequestDTO;
+import com.example.demo.dto.request.UserStaffRegistrationDTO;
 import com.example.demo.dto.response.UserDTO;
 import com.example.demo.entity.User;
 
@@ -18,4 +19,5 @@ public interface UserService {
     void deleteUser(long id);  
 
     boolean isPasswordReset(UserPaswordResetRequestDTO userPaswordResetRequestDTO);
+    User addStaff(UserStaffRegistrationDTO userStaffRegistrationDTO);
 }

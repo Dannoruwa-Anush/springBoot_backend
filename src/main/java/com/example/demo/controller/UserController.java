@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.dto.request.UserPaswordResetRequestDTO;
+import com.example.demo.dto.request.UserStaffRegistrationDTO;
 import com.example.demo.dto.response.UserDTO;
 import com.example.demo.entity.User;
 import com.example.demo.service.UserService;
@@ -79,6 +80,18 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User with the specified id does not exist.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Soory, password reset failed");
+        }
+    }
+
+    @PostMapping("/add-staff")
+    public ResponseEntity<UserDTO> addStaff(@RequestBody UserStaffRegistrationDTO userStaffRegistrationDTO) {
+        try {
+            User addedStaffUser = userService.addStaff(userStaffRegistrationDTO);
+            return ResponseEntity.status(HttpStatus.OK).body(toDTO(addedStaffUser));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 }
