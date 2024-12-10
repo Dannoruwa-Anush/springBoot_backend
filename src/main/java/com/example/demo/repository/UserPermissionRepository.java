@@ -1,5 +1,7 @@
 package com.example.demo.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -11,4 +13,5 @@ public interface UserPermissionRepository extends JpaRepository<UserPermission,L
     //It extends CrudRepository and PagingAndSortingRepository, which means it inherits methods for basic CRUD operations (like save, find, delete), as well as methods for pagination and sorting.
     
     //We can add custom queries here.
+    Optional<UserPermission> findByUserPermissionName(String userPermissionName);
 }

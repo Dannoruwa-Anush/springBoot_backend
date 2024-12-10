@@ -24,7 +24,7 @@ public class UserPermission {
     @GeneratedValue(strategy = GenerationType.IDENTITY) //generate the primary key value by the database itself using the auto-increment column option
     private Long id; //primary key
     
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String userPermissionName;
 
     //Role (Many) ---  (Many) UserPermission
