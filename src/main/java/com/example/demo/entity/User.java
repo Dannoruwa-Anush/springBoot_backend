@@ -45,7 +45,7 @@ public class User {
 
    //User (Many) ---  (Many) Role
    //User side relationship
-   @ManyToMany(fetch = FetchType.EAGER) //Eager: This means that the related entities (in the Many-to-Many relationship) will be fetched immediately when the parent entity is loaded. 
+   @ManyToMany(fetch = FetchType.LAZY) //LAZY: This means that the related entities (in the Many-to-Many relationship) will not be fetched immediately when the parent entity is loaded. 
    @JoinTable(
       name = "user_roles",
       joinColumns = @JoinColumn(name = "user_id"),
