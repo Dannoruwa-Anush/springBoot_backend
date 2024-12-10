@@ -31,4 +31,6 @@ public class UserPermission {
     //UserPermission side relationship
     @ManyToMany(mappedBy = "userPermissions") //userPermissions -> variable "private Set<UserPermission> userPermissions;" in the Role.java
     private Set<Role> roles;
+    //EAGER : When You Always Need the Related Data
+    //LAZY  : When You Avoid Unnecessary Data Loading
 }

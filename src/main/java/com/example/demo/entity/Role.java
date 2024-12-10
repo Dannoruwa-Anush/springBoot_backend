@@ -44,4 +44,6 @@ public class Role {
         inverseJoinColumns = @JoinColumn(name = "userPermission_id")
     )
     private Set<UserPermission> userPermissions;
+    //EAGER : When You Always Need the Related Data
+    //LAZY  : When You Avoid Unnecessary Data Loading
 }
