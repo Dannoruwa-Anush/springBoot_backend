@@ -8,9 +8,11 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import com.example.demo.entity.Role;
+import com.example.demo.entity.User;
 import com.example.demo.entity.UserPermission;
 import com.example.demo.repository.RoleRepository;
 import com.example.demo.repository.UserPermissionRepository;
+import com.example.demo.repository.UserRepository;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -28,6 +30,11 @@ public class DataInitializer implements CommandLineRunner {
 
     @Autowired
     private UserPermissionRepository userPermissionRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    //Need to generate [update] Random password using spring security
 
     // Helper method to create UserPermission if it doesn't exist
     private void createPermissionIfNotExist(String permissionName) {
@@ -56,6 +63,28 @@ public class DataInitializer implements CommandLineRunner {
             roleRepository.save(role);
         }
     }
+
+    // Helper method to create Admin User profile if it doesn't exist
+    private void createAdminUserProfileIfNotExist() {
+        if (userRepository.findByUsername("admin").isEmpty()) {
+            // Get the Admin role
+            Role adminRole = roleRepository.findByRoleName("Admin")
+                    .orElseThrow(() -> new RuntimeException("Admin role not found"));
+
+            // Create admin user profile
+            User admin = new User();
+            admin.setUsername("admin");
+            admin.setEmail("admin@system.com");
+            admin.setPassword("Admin123"); // this should be updated to create a random password using spring security
+            admin.setAddress("System Admin");
+            admin.setTelephoneNumber("0000000000");
+            admin.setRoles(Set.of(adminRole));
+
+            //save admin user profile
+            userRepository.save(admin);
+        }
+    }
+
 
     @Override
     public void run(String... args) throws Exception {
@@ -86,5 +115,8 @@ public class DataInitializer implements CommandLineRunner {
 
         // 4. Manager role
         createRoleIfNotExists("Manager", Set.of("CREATE", "VIEW", "UPDATE"));
+
+        // Create admin user if it doesn't exist
+        createAdminUserProfileIfNotExist();
     }
 }
