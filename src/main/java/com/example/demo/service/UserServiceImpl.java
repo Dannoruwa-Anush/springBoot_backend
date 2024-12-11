@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.common.customException.FirstLoginCustomException;
 import com.example.demo.dto.request.CustomerRegistrationDTO;
 import com.example.demo.dto.request.UserLoginDTO;
 import com.example.demo.dto.request.UserPaswordResetRequestDTO;
@@ -95,13 +96,10 @@ public class UserServiceImpl implements UserService {
       // get existing user
       User existingUser = getUserById(userPaswordResetRequestDTO.getId());
 
-      if (existingUser == null) {
-         // If existingUser does not exist, return false
-         return false;
-      }
-
-      // update - password encoding is needed / spring security
-      existingUser.setPassword(userPaswordResetRequestDTO.getNewPassword());
+      existingUser.setPassword(passwordEncoder.encode(userPaswordResetRequestDTO.getNewPassword())); // Encode temporary
+                                                                                                     // password before
+                                                                                                     // setting
+      existingUser.setFirstLogin(false); // Update the firstLogin flag to false
 
       // save user
       userRepository.save(existingUser);
@@ -181,6 +179,12 @@ public class UserServiceImpl implements UserService {
       newCustomer.setTelephoneNumber(customerRegistrationDTO.getTelephoneNumber());
       newCustomer.setRoles(roles);
 
+      /*
+       * Customer can create their own password,
+       * no need to reset it at the first login
+       */
+      newCustomer.setFirstLogin(false);
+
       // Save the new customer user
       userRepository.save(newCustomer);
 
@@ -205,10 +209,16 @@ public class UserServiceImpl implements UserService {
       User user = userRepository.findByUsername(loginRequest.getUsername())
             .orElseThrow(() -> new IllegalArgumentException("Username is not found: "));
 
-      //Get roles of user and extract roleName from it and assign it to Set<String>
+      // Get roles of user and extract roleName from it and assign it to Set<String>
       Set<String> roleNames = user.getRoles().stream()
-                            .map(Role::getRoleName) // Extract roleName from Role
-                            .collect(Collectors.toSet()); // Collect to a Set
+            .map(Role::getRoleName) // Extract roleName from Role
+            .collect(Collectors.toSet()); // Collect to a Set
+
+      // Default temporary password is set at the creation of admin and staff roles
+      // Password reset is needed only for this roles at the first time login
+      if (user.isFirstLogin() && !roleNames.contains("Customer")) {
+         throw new FirstLoginCustomException("Password reset required for first login");
+      }
 
       JwtResponseDTO jwtResponseDTO = new JwtResponseDTO(
             jwtToken, user.getId(), user.getUsername(), user.getEmail(), roleNames);

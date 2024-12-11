@@ -47,6 +47,9 @@ public class User {
    @Column(length = 15)
    private String telephoneNumber;
 
+   @Column(name = "first_login", nullable = false)
+   private boolean firstLogin = true;
+   
    // User (Many) --- (Many) Role
    // User side relationship
    @ManyToMany(fetch = FetchType.LAZY) // LAZY: This means that the related entities (in the Many-to-Many relationship)
