@@ -16,6 +16,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.example.demo.security.jwt.AuthEntryPointJwt;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 import com.example.demo.security.jwt.AuthTokenFilter;
 
 @Configuration
@@ -118,7 +120,7 @@ public class WebSecurityConfig {
     // ---
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors().and().csrf(csrf -> csrf.disable())
+        http.cors(withDefaults()).csrf(csrf -> csrf.disable())
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
