@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
@@ -32,6 +33,7 @@ public class UserController {
 
         return dto;
     }
+    // ---
 
     // Get all users
     @GetMapping
@@ -40,6 +42,7 @@ public class UserController {
         List<UserDTO> userResponseDTOs = users.stream().map(this::toDTO).collect(Collectors.toList());
         return ResponseEntity.status(HttpStatus.OK).body(userResponseDTOs);
     }
+    // ---
 
     // Get user by ID
     @GetMapping("/{id}")
@@ -51,6 +54,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
+    // ---
 
     // Update user profile by ID
     @PutMapping("/{id}")
@@ -64,6 +68,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+    // ---
 
     // Update user password
     @PutMapping("/reset-password")
@@ -82,16 +87,27 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Soory, password reset failed");
         }
     }
+    // ---
 
+    // add staff - this is alloacted for Admin role
     @PostMapping("/add-staff")
-    public ResponseEntity<UserDTO> addStaff(@RequestBody UserStaffRegistrationDTO userStaffRegistrationDTO) {
+    public ResponseEntity<Object> addStaff(@RequestBody UserStaffRegistrationDTO userStaffRegistrationDTO) {
         try {
-            User addedStaffUser = userService.addStaff(userStaffRegistrationDTO);
-            return ResponseEntity.status(HttpStatus.OK).body(toDTO(addedStaffUser));
+            userService.addStaff(userStaffRegistrationDTO);
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(Map.of("message", "Staff user successfully created", "status", HttpStatus.CREATED.value()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage(), "status", HttpStatus.BAD_REQUEST.value()));
         } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage(), "status", HttpStatus.NOT_FOUND.value()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "An unexpected error occurred", "status",
+                            HttpStatus.INTERNAL_SERVER_ERROR.value()));
         }
     }
+    // ---
 }

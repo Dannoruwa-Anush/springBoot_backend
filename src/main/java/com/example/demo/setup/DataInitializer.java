@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import com.example.demo.entity.Role;
@@ -34,7 +35,8 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private UserRepository userRepository;
 
-    //Need to generate [update] Random password using spring security
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
     // Helper method to create UserPermission if it doesn't exist
     private void createPermissionIfNotExist(String permissionName) {
@@ -75,16 +77,19 @@ public class DataInitializer implements CommandLineRunner {
             User admin = new User();
             admin.setUsername("admin");
             admin.setEmail("admin@system.com");
-            admin.setPassword("Admin123"); // this should be updated to create a random password using spring security
+            
+            //Temporary password is assigned
+            String tempPassword = "admin";
+            admin.setPassword(passwordEncoder.encode(tempPassword)); //Encode temporary password before setting
+            
             admin.setAddress("System Admin");
             admin.setTelephoneNumber("0000000000");
             admin.setRoles(Set.of(adminRole));
 
-            //save admin user profile
+            // save admin user profile
             userRepository.save(admin);
         }
     }
-
 
     @Override
     public void run(String... args) throws Exception {

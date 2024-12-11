@@ -20,4 +20,6 @@ public interface RoleService {
     Role saveOrUpdateRoleWithPermissions(RoleRequestDTO roleRequest);
     Role addPermissionsToExistingRole(RoleRequestDTO roleRequest);
     Role removePermissionsFromExistingRole(RoleRequestDTO roleRequest);
+
+    Role getRoleByName(String roleName);
 }

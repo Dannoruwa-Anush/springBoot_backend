@@ -129,4 +129,9 @@ public class RoleServiceImpl implements RoleService {
         // Save the updated role
         return roleRepository.save(role);
     }
+
+    @Override
+    public Role getRoleByName(String roleName) {
+        return roleRepository.findByRoleName(roleName).orElseThrow(() -> new NoSuchElementException(roleName +" is not found with role name"));
+    }
 }
