@@ -16,34 +16,29 @@ import com.example.demo.repository.UserRepository;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
-    //This file implements UserDetailsService that is defined in the springframework.security.core
+    // This file implements UserDetailsService that is defined in the
+    // springframework.security.core
 
     @Autowired
     private UserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findByUsernameWithRolesAndPermissions(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        User user = userRepository.findByUsername(username).orElse(null);
-        //Load User Roles
-
-        if(user == null) {
-            throw new UsernameNotFoundException("User not found with the given username");
-        }
-
-        //------ modified----
+        // Extract authorities
         Set<GrantedAuthority> authorities = user.getRoles().stream()
-        .flatMap(role -> role.getUserPermissions().stream())
-        .map(permission -> new SimpleGrantedAuthority(permission.getUserPermissionName()))
-        .collect(Collectors.toSet());
-        //---------------------
+                .flatMap(role -> role.getUserPermissions().stream())
+                .map(permission -> new SimpleGrantedAuthority(permission.getUserPermissionName()))
+                .collect(Collectors.toSet());
 
-
+        // Return UserDetails
         return org.springframework.security.core.userdetails.User.builder()
-            .username(user.getUsername())
-            .password(user.getPassword())
-            .authorities(authorities) //modified
-            .build();
+                .username(user.getUsername())
+                .password(user.getPassword())
+                .authorities(authorities)
+                .build();
     }
-    //---
+    // ---
 }
