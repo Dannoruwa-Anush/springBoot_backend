@@ -35,6 +35,9 @@ public class Book {
     @Column(nullable = false)
     private double unitPrice;
 
+    @Column(nullable = false)
+    private int qoh;//Quantity on hand
+
     @Column(name = "cover_image", nullable = false)
     private String coverImage; //path for coverImage
 

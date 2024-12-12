@@ -36,6 +36,10 @@ public class BookServiceImpl implements BookService {
             throw new IllegalArgumentException("Unit price must be a positive value.");
         }
 
+        if (bookSaveRequestDTO.getQoh() < 0) {
+            throw new IllegalArgumentException("QOH must be a positive value.");
+        }
+
         if (bookSaveRequestDTO.getCoverImage() != null && bookSaveRequestDTO.getCoverImage().isEmpty()) {
             throw new IllegalArgumentException("Cover image is invalid.");
         }
