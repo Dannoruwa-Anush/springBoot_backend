@@ -1,9 +1,11 @@
 package com.example.demo.entity;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
-import com.example.demo.common.customException.projectEnum.OrderStatus;
+import com.example.demo.common.projectEnum.OrderStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
@@ -60,20 +62,22 @@ public class Order {
      */
     @PrePersist // is called before the entity is inserted
     public void onPrePersist() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+        ZonedDateTime zonedNowUtc = ZonedDateTime.now(ZoneId.of("UTC")); // Convert to UTC time zone
+        this.createdAt = zonedNowUtc.toLocalDateTime(); // Convert to LocalDateTime for storage
+        this.updatedAt = zonedNowUtc.toLocalDateTime(); // Convert to LocalDateTime for storage
     }
 
     @PreUpdate // is called before the entity is updated
     public void onPreUpdate() {
-        this.updatedAt = LocalDateTime.now();
+        ZonedDateTime zonedNowUtc = ZonedDateTime.now(ZoneId.of("UTC"));// Convert to UTC time zone
+        this.updatedAt = zonedNowUtc.toLocalDateTime(); // Convert to LocalDateTime for storage
     }
 
     // Order (Many) --- (Many) Book
     // Order side relationship
     @ManyToMany(fetch = FetchType.LAZY) // LAZY: This means that the related entities (in the Many-to-Many relationship)
                                         // will not be fetched immediately when the parent entity is loaded.
-    @JoinTable(name = "order-books", joinColumns = @JoinColumn(name = "order_id"), inverseJoinColumns = @JoinColumn(name = "book_id"))
+    @JoinTable(name = "order_books", joinColumns = @JoinColumn(name = "order_id"), inverseJoinColumns = @JoinColumn(name = "book_id"))
     @JsonIgnore // prevent this property from being included in the JSON output.
     private List<Book> books;
 
