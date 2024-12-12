@@ -39,6 +39,9 @@ public class Order {
                                                         // the auto-increment column option
     private Long id; // primary key
 
+    @Column(name = "total_amount", nullable = false)
+    private double totalAmount;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

@@ -1,5 +1,5 @@
 package com.example.demo.common.projectEnum;
 
 public enum OrderStatus {
-    PENDING, SHIPPED, DELIVERED
+    PENDING, SHIPPED, DELIVERED, CANCELLED
 }

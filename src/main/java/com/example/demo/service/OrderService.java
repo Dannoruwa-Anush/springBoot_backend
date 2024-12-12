@@ -3,9 +3,12 @@ package com.example.demo.service;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+
 import com.example.demo.common.projectEnum.OrderStatus;
 import com.example.demo.entity.Order;
 
+@Service
 public interface OrderService {
     List<Order> getAllOrders();
     Order getOrderById(long id);
@@ -16,4 +19,6 @@ public interface OrderService {
     List<Order> getAllOrdersByUserId(Long inputUserId);
     List<Order> getAllOrdersByOrderStatus(OrderStatus inputOrderStatus);
     List<Order> getAllOrdersByOrderPlaceDate(Date inputOrderPlacedDate);
+
+    Order updateOrderStatus(long id, OrderStatus newStatus);
 }
