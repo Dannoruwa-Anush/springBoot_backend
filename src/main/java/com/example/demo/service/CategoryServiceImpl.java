@@ -36,9 +36,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Category saveCategory(Category category) {
-        Optional<Category> existingCategory = categoryRepository.findByCategoryName(category.getCategoryName());
+        Optional<Category> CategoryWithSameName = categoryRepository.findByCategoryName(category.getCategoryName());
 
-        if (existingCategory.isPresent()) {
+        if (CategoryWithSameName.isPresent()) {
             throw new IllegalArgumentException("Category with name " + category.getCategoryName() + " already exists");
         }
         return categoryRepository.save(category);
