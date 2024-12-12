@@ -11,11 +11,13 @@ import com.example.demo.entity.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-    // JpaRepository is a generic interface, meaning it can work with any entity
-    // class and its corresponding ID type
-    // It extends CrudRepository and PagingAndSortingRepository, which means it
-    // inherits methods for basic CRUD operations (like save, find, delete), as well
-    // as methods for pagination and sorting.
+    /*
+     * JpaRepository is a generic interface, meaning it can work with any entity
+     * class and its corresponding ID type
+     * It extends CrudRepository and PagingAndSortingRepository, which means it
+     * inherits methods for basic CRUD operations (like save, find, delete), as well
+     * as methods for pagination and sorting.
+     */
 
     // We can add custom queries here.
 
