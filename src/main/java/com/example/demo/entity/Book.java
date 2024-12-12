@@ -35,7 +35,7 @@ public class Book {
     @Column(nullable = false)
     private double unitPrice;
 
-    @Column(name = "cover_image", nullable = true)
+    @Column(name = "cover_image", nullable = false)
     private String coverImage; //path for coverImage
 
     //Book (Many) ---  (One) SubCategory
