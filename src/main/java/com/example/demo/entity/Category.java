@@ -29,7 +29,7 @@ public class Category {
     private Long id; // primary key
 
     @Column(name="category_name", nullable = false, unique = true)
-    private String CategoryName;
+    private String categoryName;
 
     // Category (one) -- (Many) SubCategory
     // Category side relationship
