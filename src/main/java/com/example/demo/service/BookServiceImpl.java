@@ -1,5 +1,5 @@
 package com.example.demo.service;
 
-public @interface AutoWired {
-
+public class BookServiceImpl {
+    
 }

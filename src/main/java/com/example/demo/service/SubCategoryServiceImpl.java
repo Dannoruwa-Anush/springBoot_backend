@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.entity.SubCategory;
@@ -14,7 +15,7 @@ import com.example.demo.repository.SubCategoryRepository;
 @Service
 public class SubCategoryServiceImpl implements SubCategoryService{
     
-    @AutoWired
+    @Autowired
     private SubCategoryRepository subCategoryRepository;
 
     private static final Logger logger =LoggerFactory.getLogger(SubCategoryServiceImpl.class);
