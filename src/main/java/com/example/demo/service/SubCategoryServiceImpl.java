@@ -52,7 +52,7 @@ public class SubCategoryServiceImpl implements SubCategoryService{
         }
 
         existingSubCategory.setSubCategoryName(subCategory.getSubCategoryName());  
-        return subCategoryRepository.save(subCategory);
+        return subCategoryRepository.save(existingSubCategory);
     }
     //---
 
