@@ -30,7 +30,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Category getCategoryById(long id) {
         return categoryRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Category not found with id: " + id));
+                .orElseThrow(() -> new NoSuchElementException("Category is not found with id: " + id));
     }
     // ---
 
@@ -62,7 +62,7 @@ public class CategoryServiceImpl implements CategoryService {
         Optional<Category> existingCategory = categoryRepository.findById(id);
 
         if (!existingCategory.isPresent()) {
-            throw new IllegalArgumentException("Category not found with id: " + id);
+            throw new IllegalArgumentException("Category is not found with id: " + id);
         }
 
         categoryRepository.deleteById(id);

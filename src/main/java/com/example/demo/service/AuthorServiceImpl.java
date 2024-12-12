@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.entity.Author;
@@ -14,7 +15,7 @@ import com.example.demo.repository.AuthorRepository;
 @Service
 public class AuthorServiceImpl implements AuthorService{
     
-    @AutoWired
+    @Autowired
     private AuthorRepository authorRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthorServiceImpl.class);
@@ -27,7 +28,7 @@ public class AuthorServiceImpl implements AuthorService{
 
     @Override
     public Author getAuthorById(long id) {
-        return authorRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Author not found with id: \" + id"));
+        return authorRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Author is not found with id: \" + id"));
     }
     //---
 
@@ -61,7 +62,7 @@ public class AuthorServiceImpl implements AuthorService{
        Optional<Author> existingAuthor = authorRepository.findById(id);
 
        if(!existingAuthor.isPresent()){
-        throw new IllegalArgumentException("Author not found with id: " + id);
+        throw new IllegalArgumentException("Author is not found with id: " + id);
        }
 
        authorRepository.deleteById(id);

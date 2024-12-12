@@ -27,7 +27,7 @@ public class SubCategoryServiceImpl implements SubCategoryService{
 
     @Override
     public SubCategory getSubCategoryById(long id) {
-        return subCategoryRepository.findById(id).orElseThrow(() -> new NoSuchElementException("SubCategory not found with id: " + id));
+        return subCategoryRepository.findById(id).orElseThrow(() -> new NoSuchElementException("SubCategory is not found with id: " + id));
     }
     //---
 
@@ -61,7 +61,7 @@ public class SubCategoryServiceImpl implements SubCategoryService{
         Optional<SubCategory> existingSubCategory = subCategoryRepository.findById(id);
 
         if(!existingSubCategory.isPresent()){
-            throw new IllegalArgumentException("SubCategory not found with id: " + id);
+            throw new IllegalArgumentException("SubCategory is not found with id: " + id);
         }
 
         subCategoryRepository.deleteById(id);
