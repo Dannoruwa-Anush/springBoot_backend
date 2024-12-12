@@ -28,7 +28,7 @@ public class Author {
                                                         // the auto-increment column option
     private Long id; // primary key
 
-    @Column(name = "author_name", nullable = false)
+    @Column(name = "author_name", nullable = false, unique = true)
     private String authorName;
 
     // Author (one) --- (Many) Book
