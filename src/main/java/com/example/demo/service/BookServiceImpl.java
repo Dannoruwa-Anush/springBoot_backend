@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.dto.request.BookSaveRequestDTO;
+import com.example.demo.dto.request.saveRequest.BookSaveRequestDTO;
 import com.example.demo.entity.Book;
 import com.example.demo.repository.BookRepository;
 import com.example.demo.service.commonService.FileUploadService;

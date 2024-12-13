@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.example.demo.dto.request.BookSaveRequestDTO;
+import com.example.demo.dto.request.saveRequest.BookSaveRequestDTO;
 import com.example.demo.entity.Book;
 
 @Service
