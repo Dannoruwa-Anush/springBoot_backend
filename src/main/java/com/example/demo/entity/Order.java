@@ -42,9 +42,11 @@ public class Order {
     @Column(name = "total_amount", nullable = false)
     private double totalAmount;
 
+    @JsonIgnore // prevent this property from being included in the JSON output.
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @JsonIgnore // prevent this property from being included in the JSON output.
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
@@ -90,5 +92,6 @@ public class Order {
     @ManyToOne(fetch = FetchType.LAZY) // LAZY: This means that the related entities (Category) will not be fetched
                                        // immediately when the parent entity (SubCategory) is loaded.
     @JoinColumn(name = "user_id", nullable = false) // Foreign key column
+    @JsonIgnore // prevent this property from being included in the JSON output.
     private User user;
 }

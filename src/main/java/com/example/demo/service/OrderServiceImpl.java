@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,9 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.common.projectEnum.OrderStatus;
+import com.example.demo.dto.request.OrderRequestDTO;
 import com.example.demo.entity.Book;
 import com.example.demo.entity.Order;
+import com.example.demo.entity.User;
+import com.example.demo.repository.BookRepository;
 import com.example.demo.repository.OrderRepository;
+import com.example.demo.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
 
@@ -23,7 +28,31 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private OrderRepository orderRepository;
 
+    @Autowired
+    private BookRepository bookRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
     private static final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
+
+    // Helper function for save & update order
+    private List<Book> fetchAndValidateBooks(Set<Long> bookIds) {
+        List<Book> books = bookRepository.findAllById(bookIds);
+        if (books.isEmpty()) {
+            throw new NoSuchElementException("No books found for the given book IDs.");
+        }
+
+        books.forEach(book -> {
+            if (book.getQoh() <= 0) {
+                throw new IllegalStateException("Book with title '" + book.getTitle() + "' is out of stock.");
+            }
+            book.setQoh(book.getQoh() - 1);
+        });
+
+        return books;
+    }
+    // ---
 
     @Override
     public List<Order> getAllOrders() {
@@ -34,7 +63,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Order getOrderById(long id) {
         return orderRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Order is not found with id: \" + id"));
+                .orElseThrow(() -> new NoSuchElementException("Order is not found with id: " + id));
     }
     // ---
 
@@ -49,61 +78,81 @@ public class OrderServiceImpl implements OrderService {
      * all changes made to the database within the method will be undone.
      * 
      */
-
     @Override
     @Transactional
-    public Order saveOrder(Order order) {
-        if (order.getTotalAmount() <= 0) {
+    public Order saveOrder(OrderRequestDTO orderRequestDTO) {
+        // Validate total amount
+        if (orderRequestDTO.getTotalAmount() <= 0) {
             throw new IllegalArgumentException("Total amount must be a positive value.");
         }
 
-        // Reduce the qoh for each book in the order
-        for (Book book : order.getBooks()) {
-            if (book.getQoh() <= 0) {
-                throw new IllegalStateException("Book with title '" + book.getTitle() + "' is out of stock.");
-            }
-            book.setQoh(book.getQoh() - 1); // Decrement qoh by 1 for each book ordered
-        }
+        // Fetch customer details
+        User customer = userRepository.findById(orderRequestDTO.getCustomerId())
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Customer not found with userId: " + orderRequestDTO.getCustomerId()));
 
+        // Fetch and validate books
+        List<Book> books = fetchAndValidateBooks(orderRequestDTO.getBookIds());
+
+        // Create and populate order
+        Order order = new Order();
+        order.setTotalAmount(orderRequestDTO.getTotalAmount());
+        order.setBooks(books);
+        order.setUser(customer);
+        order.setStatus(OrderStatus.PENDING); // Set status to PENDING
+
+        // Save order
         return orderRepository.save(order);
     }
     // ---
 
+    /*
+     * @Transactional Annotation: Applied to both methods to define the transaction
+     * boundary.
+     * 
+     * Automatic Rollback: Any exception thrown during the execution of these
+     * methods will trigger a rollback.
+     * 
+     * Database Consistency: If an exception occurs (e.g., IllegalStateException),
+     * all changes made to the database within the method will be undone.
+     * 
+     */
     @Override
     @Transactional
-    public Order updateOrder(long id, Order order) {
+    public Order updateOrder(long id, OrderRequestDTO orderRequestDTO) {
+        // Fetch existing order
         Order existingOrder = getOrderById(id);
 
-        // Check if the order is already processed
-        if (existingOrder.getStatus().equals(OrderStatus.DELIVERED)
-                || existingOrder.getStatus().equals(OrderStatus.SHIPPED)) {
+        // Validate order status
+        if (existingOrder.getStatus().equals(OrderStatus.DELIVERED) ||
+                existingOrder.getStatus().equals(OrderStatus.SHIPPED)) {
             throw new IllegalArgumentException("This order cannot be updated, since it is already processed.");
         }
 
-        // Restore qoh for books in the existing order
-        for (Book existingBook : existingOrder.getBooks()) {
-            existingBook.setQoh(existingBook.getQoh() + 1); // Add back the reserved quantity
-        }
+        // Restore stock for books in the existing order
+        existingOrder.getBooks().forEach(book -> book.setQoh(book.getQoh() + 1));
 
-        // Validate the new order details
-        if (order.getTotalAmount() <= 0) {
+        // Validate new order total amount
+        if (orderRequestDTO.getTotalAmount() <= 0) {
             throw new IllegalArgumentException("Total amount must be a positive value.");
         }
 
-        // Reduce qoh for the new books
-        for (Book newBook : order.getBooks()) {
-            if (newBook.getQoh() <= 0) {
-                throw new IllegalStateException("Book with title '" + newBook.getTitle() + "' is out of stock.");
-            }
-            newBook.setQoh(newBook.getQoh() - 1); // Decrement qoh for each book
-        }
+        // Fetch customer details
+        User customer = userRepository.findById(orderRequestDTO.getCustomerId())
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Customer not found with userId: " + orderRequestDTO.getCustomerId()));
 
-        // Update the existing order
-        existingOrder.setBooks(order.getBooks());
-        existingOrder.setTotalAmount(order.getTotalAmount());
-        existingOrder.setStatus(order.getStatus()); // Optionally update the status if needed
+        // Fetch and validate books
+        List<Book> books = fetchAndValidateBooks(orderRequestDTO.getBookIds());
 
-        return orderRepository.save(existingOrder); // Save the updated order
+        // Update order details
+        existingOrder.setTotalAmount(orderRequestDTO.getTotalAmount());
+        existingOrder.setBooks(books);
+        existingOrder.setUser(customer);
+        existingOrder.setStatus(OrderStatus.PENDING); // Reset status to PENDING
+
+        // Save and return the updated order
+        return orderRepository.save(existingOrder);
     }
     // ---
 

@@ -6,14 +6,15 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.common.projectEnum.OrderStatus;
+import com.example.demo.dto.request.OrderRequestDTO;
 import com.example.demo.entity.Order;
 
 @Service
 public interface OrderService {
     List<Order> getAllOrders();
     Order getOrderById(long id);
-    Order saveOrder(Order order);
-    Order updateOrder(long id, Order order);
+    Order saveOrder(OrderRequestDTO orderRequestDTO);
+    Order updateOrder(long id, OrderRequestDTO orderRequestDTO);
     void deleteOrder(long id);  
 
     List<Order> getAllOrdersByUserId(Long inputUserId);
