@@ -62,6 +62,8 @@ public class CategoryController {
             return ResponseEntity.status(HttpStatus.OK).body(category);
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+        }catch(Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
     //---
@@ -74,6 +76,8 @@ public class CategoryController {
             return ResponseEntity.status(HttpStatus.CREATED).body(savedCategory);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage()));
+        }catch(Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
         }
     }
     //---
@@ -88,6 +92,8 @@ public class CategoryController {
         }
         catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Category is not found");
+        }catch(Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
         }
     }
     //---
@@ -102,6 +108,8 @@ public class CategoryController {
         }
         catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Category is not found");
+        }catch(Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
         }
     }
     //---
