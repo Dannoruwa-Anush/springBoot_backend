@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.common.customHttpResponse.ErrorResponse;
+import com.example.demo.common.customHttpResponse.CustomErrorResponse;
 import com.example.demo.entity.Category;
 import com.example.demo.service.CategoryService;
 
@@ -75,7 +75,7 @@ public class CategoryController {
             Category savedCategory = categoryService.saveCategory(category);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedCategory);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
         }catch(Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
         }
@@ -88,7 +88,7 @@ public class CategoryController {
             Category updatedCategory = categoryService.updateCategory(id, category);
             return ResponseEntity.status(HttpStatus.OK).body(updatedCategory);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
         }
         catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Category is not found");
@@ -104,7 +104,7 @@ public class CategoryController {
             categoryService.deleteCategory(id);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
         }
         catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Category is not found");

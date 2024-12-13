@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.common.customHttpResponse.ErrorResponse;
+import com.example.demo.common.customHttpResponse.CustomErrorResponse;
 import com.example.demo.dto.request.saveRequest.SubCategorySaveRequestDTO;
 import com.example.demo.entity.SubCategory;
 import com.example.demo.service.SubCategoryService;
@@ -73,7 +73,7 @@ public class SubCategoryController {
             SubCategory savedSubCategory = subCategoryService.saveSubCategory(subCategorySaveRequestDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedSubCategory);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
         }catch(Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
@@ -86,7 +86,7 @@ public class SubCategoryController {
             SubCategory updatedSubCategory = subCategoryService.updateSubCategory(id, subCategorySaveRequestDTO);
             return ResponseEntity.status(HttpStatus.OK).body(updatedSubCategory);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Sub category is not found");
         }
@@ -99,7 +99,7 @@ public class SubCategoryController {
             subCategoryService.deleteSubCategory(id);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Sub category is not found");
         }

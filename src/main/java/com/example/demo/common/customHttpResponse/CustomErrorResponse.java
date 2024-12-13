@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data // generate Getters and Setters using Lombok
-public class ErrorResponse {
+public class CustomErrorResponse {
     
     private String message;
 }
