@@ -1,6 +1,6 @@
 package com.example.demo.service;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ public interface OrderService {
 
     List<Order> getAllOrdersByUserId(Long inputUserId);
     List<Order> getAllOrdersByOrderStatus(OrderStatus inputOrderStatus);
-    List<Order> getAllOrdersByOrderPlaceDate(Date inputOrderPlacedDate);
+    List<Order> findAllOrdersByDateAndStatus(LocalDate inputOrderPlacedDate, OrderStatus inputOrderStatus);
 
     Order updateOrderStatus(long id, OrderStatus newStatus);
 }

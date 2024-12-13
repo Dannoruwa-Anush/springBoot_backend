@@ -1,6 +1,6 @@
 package com.example.demo.service;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -182,8 +182,8 @@ public class OrderServiceImpl implements OrderService {
     // ---
 
     @Override
-    public List<Order> getAllOrdersByOrderPlaceDate(Date inputOrderPlacedDate) {
-        return orderRepository.findAllOrdersByOrderPlaceDate(inputOrderPlacedDate);
+    public List<Order> findAllOrdersByDateAndStatus(LocalDate inputOrderPlacedDate, OrderStatus inputOrderStatus) {
+        return orderRepository.findAllOrdersByDateAndStatus(inputOrderPlacedDate, inputOrderStatus);
     }
     // ---
 

@@ -1,6 +1,6 @@
 package com.example.demo.repository;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,9 +33,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT o FROM Order o where o.status = :inputOrderStatus")
     List<Order> findAllOrdersByOrderStatus(@Param("inputOrderStatus") OrderStatus inputOrderStatus);
 
-    // 3. find all orders by order place date
-    // SQL QUERY : SELECT * FROM orders WHERE createdAt = inputOrderPlacedDate;
+    // 3. find all orders by order place date (compare only the date part) and status
+    // SQL QUERY : SELECT * FROM orders WHERE createdAt = inputOrderPlacedDate AND status = inputOrderStatus;
     // JPQL query
-    @Query("SELECT o FROM Order o where o.createdAt = :inputOrderPlacedDate")
-    List<Order> findAllOrdersByOrderPlaceDate(@Param("inputOrderPlacedDate") Date inputOrderPlacedDate);
+    @Query("SELECT o FROM Order o WHERE FUNCTION('DATE', o.createdAt) = :inputOrderPlacedDate AND o.status = :inputOrderStatus")
+    List<Order> findAllOrdersByDateAndStatus(@Param("inputOrderPlacedDate") LocalDate inputOrderPlacedDate, @Param("inputOrderStatus") OrderStatus inputOrderStatus);
 }

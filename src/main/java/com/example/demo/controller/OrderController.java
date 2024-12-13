@@ -134,9 +134,9 @@ public class OrderController {
     }
     // ---
 
-    @GetMapping("/orderDate")
-    public ResponseEntity<List<Order>> getAllOrdersByOrderPlaceDate(@RequestBody OrderByDateRequestDTO orderByDateRequestDTO) {
-        List<Order> orders = orderService.getAllOrdersByOrderPlaceDate(orderByDateRequestDTO.getCheckedDate());
+    @GetMapping("/orderDateAndStatus")
+    public ResponseEntity<List<Order>> findAllOrdersByDateAndStatus(@RequestBody OrderByDateRequestDTO orderByDateRequestDTO) {
+        List<Order> orders = orderService.findAllOrdersByDateAndStatus(orderByDateRequestDTO.getCheckedDate(), orderByDateRequestDTO.getCheckedStatus());
 
         if (orders.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
