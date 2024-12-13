@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.common.customHttpResponse.CustomErrorResponse;
 import com.example.demo.dto.request.saveRequest.BookSaveRequestDTO;
-import com.example.demo.dto.response.getResponseDTO.BookAuthorResponseDTO;
+import com.example.demo.dto.response.BookResponseDTO;
 import com.example.demo.entity.Book;
 import com.example.demo.service.BookService;
 
@@ -42,12 +42,12 @@ public class BookController {
 
     //Helper function to convert entity to dto
     //This will be used only for getById API
-    private static BookAuthorResponseDTO toGetResponseDTO(Book book){
+    private static BookResponseDTO toGetResponseDTO(Book book){
         if(book == null){
             return null;
         }
 
-        return new BookAuthorResponseDTO(book.getId(), book.getTitle(), book.getUnitPrice(), book.getQoh(), book.getAuthor().getAuthorName());
+        return new BookResponseDTO(book.getId(), book.getTitle(), book.getUnitPrice(), book.getQoh(), book.getAuthor().getAuthorName());
     } 
     //---
 
@@ -64,7 +64,7 @@ public class BookController {
     // ---
 
     @GetMapping("/book/{id}")
-    public ResponseEntity<BookAuthorResponseDTO> getAllBookById(@PathVariable Long id) {
+    public ResponseEntity<BookResponseDTO> getAllBookById(@PathVariable Long id) {
         try {
             Book book = bookService.getBookById(id);
             return ResponseEntity.status(HttpStatus.OK).body(toGetResponseDTO(book));
