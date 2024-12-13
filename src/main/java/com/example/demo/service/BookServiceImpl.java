@@ -11,8 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.request.saveRequest.BookSaveRequestDTO;
+import com.example.demo.entity.Author;
 import com.example.demo.entity.Book;
+import com.example.demo.entity.SubCategory;
+import com.example.demo.repository.AuthorRepository;
 import com.example.demo.repository.BookRepository;
+import com.example.demo.repository.SubCategoryRepository;
 import com.example.demo.service.commonService.FileUploadService;
 
 @Service
@@ -23,6 +27,12 @@ public class BookServiceImpl implements BookService {
 
     @Autowired
     private FileUploadService fileUploadConfig;
+
+    @Autowired
+    private AuthorRepository authorRepository;
+
+    @Autowired
+    private SubCategoryRepository subCategoryRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(BookServiceImpl.class);
 
@@ -63,14 +73,24 @@ public class BookServiceImpl implements BookService {
     public Book saveBook(BookSaveRequestDTO bookSaveRequestDTO) {
         validateBookSaveRequest(bookSaveRequestDTO); //validate requests
 
+        //Get related author information of the book
+        Author relatedAuthor = authorRepository.findById(bookSaveRequestDTO.getAuthorId()).orElseThrow(() -> new NoSuchElementException("Author is not found with id: " + bookSaveRequestDTO.getAuthorId()));
+
+        //Get related subCategory information of the book
+        SubCategory relatedSubCategory = subCategoryRepository.findById(bookSaveRequestDTO.getSubCategoryId()).orElseThrow(() -> new NoSuchElementException("Sub category is not found with id: " + bookSaveRequestDTO.getSubCategoryId()));
+
         try {
             // Validate and save the uploaded file
             String coverImagePath = fileUploadConfig.saveFile(bookSaveRequestDTO.getCoverImage());
 
+            //create a new book
             Book book = new Book();
             book.setTitle(bookSaveRequestDTO.getTitle());
             book.setUnitPrice(bookSaveRequestDTO.getUnitPrice());
+            book.setQoh(bookSaveRequestDTO.getQoh());
             book.setCoverImage(coverImagePath);
+            book.setAuthor(relatedAuthor);
+            book.setSubCategory(relatedSubCategory);
             
             return bookRepository.save(book);
 
@@ -85,11 +105,20 @@ public class BookServiceImpl implements BookService {
 
         validateBookSaveRequest(bookSaveRequestDTO); //validate requests
 
+        //Get related author information of the book
+        Author relatedAuthor = authorRepository.findById(bookSaveRequestDTO.getAuthorId()).orElseThrow(() -> new NoSuchElementException("Author is not found with id: " + bookSaveRequestDTO.getAuthorId()));
+
+        //Get related subCategory information of the book
+        SubCategory relatedSubCategory = subCategoryRepository.findById(bookSaveRequestDTO.getSubCategoryId()).orElseThrow(() -> new NoSuchElementException("Sub category is not found with id: " + bookSaveRequestDTO.getSubCategoryId()));
+
         try {
             Book existingBook = getBookById(id);
             existingBook.setTitle(bookSaveRequestDTO.getTitle());
             existingBook.setUnitPrice(bookSaveRequestDTO.getUnitPrice());
-
+            existingBook.setQoh(bookSaveRequestDTO.getQoh());
+            existingBook.setAuthor(relatedAuthor);
+            existingBook.setSubCategory(relatedSubCategory);
+            
             // Handle cover image update
             if (bookSaveRequestDTO.getCoverImage() != null && !bookSaveRequestDTO.getCoverImage().isEmpty()) {
                 // Validate and save the uploaded file
