@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.dto.request.saveRequest.SubCategorySaveRequestDTO;
+import com.example.demo.dto.request.SubCategoryRequestDTO;
 import com.example.demo.entity.Category;
 import com.example.demo.entity.SubCategory;
 import com.example.demo.repository.CategoryRepository;
@@ -38,7 +38,7 @@ public class SubCategoryServiceImpl implements SubCategoryService{
     //---
 
     @Override
-    public SubCategory saveSubCategory(SubCategorySaveRequestDTO subCategorySaveRequestDTO) {
+    public SubCategory saveSubCategory(SubCategoryRequestDTO subCategorySaveRequestDTO) {
         Optional<SubCategory> subCategoryWithSameName = subCategoryRepository.findBySubCategoryName(subCategorySaveRequestDTO.getSubCategoryName());
         
         if(subCategoryWithSameName.isPresent()){
@@ -58,7 +58,7 @@ public class SubCategoryServiceImpl implements SubCategoryService{
     //---
 
     @Override
-    public SubCategory updateSubCategory(long id, SubCategorySaveRequestDTO subCategorySaveRequestDTO) {
+    public SubCategory updateSubCategory(long id, SubCategoryRequestDTO subCategorySaveRequestDTO) {
         SubCategory existingSubCategory = getSubCategoryById(id);
         
         if((existingSubCategory.getSubCategoryName()).equals(subCategorySaveRequestDTO.getSubCategoryName())){

@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.example.demo.dto.request.saveRequest.BookSaveRequestDTO;
+import com.example.demo.dto.request.BookRequestDTO;
 import com.example.demo.entity.Book;
 
 @Service
@@ -14,9 +14,9 @@ public interface BookService {
 
     Book getBookById(long id);
 
-    Book saveBook(BookSaveRequestDTO bookSaveRequestDTO);
+    Book saveBook(BookRequestDTO bookSaveRequestDTO);
 
-    Book updateBook(long id, BookSaveRequestDTO bookSaveRequestDTO);
+    Book updateBook(long id, BookRequestDTO bookSaveRequestDTO);
 
     void deleteBook(long id);
 

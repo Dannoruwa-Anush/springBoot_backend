@@ -1,11 +1,11 @@
-package com.example.demo.dto.request.saveRequest;
+package com.example.demo.dto.request;
 
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.Data;
 
 @Data
-public class BookSaveRequestDTO {
+public class BookRequestDTO {
     
     private String title;
     private double unitPrice;

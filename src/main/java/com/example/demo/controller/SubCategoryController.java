@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.common.customHttpResponse.CustomErrorResponse;
-import com.example.demo.dto.request.saveRequest.SubCategorySaveRequestDTO;
+import com.example.demo.dto.request.SubCategoryRequestDTO;
 import com.example.demo.entity.SubCategory;
 import com.example.demo.service.SubCategoryService;
 
@@ -67,7 +67,7 @@ public class SubCategoryController {
     // ---
 
     @PostMapping
-    public ResponseEntity<Object> createSubCategory(@RequestBody SubCategorySaveRequestDTO subCategorySaveRequestDTO) {
+    public ResponseEntity<Object> createSubCategory(@RequestBody SubCategoryRequestDTO subCategorySaveRequestDTO) {
         
         try {
             SubCategory savedSubCategory = subCategoryService.saveSubCategory(subCategorySaveRequestDTO);
@@ -81,7 +81,7 @@ public class SubCategoryController {
     // ---
 
     @PutMapping("{id}")
-    public ResponseEntity<Object> updateSubCategory(@PathVariable Long id, @RequestBody SubCategorySaveRequestDTO subCategorySaveRequestDTO) {
+    public ResponseEntity<Object> updateSubCategory(@PathVariable Long id, @RequestBody SubCategoryRequestDTO subCategorySaveRequestDTO) {
         try {
             SubCategory updatedSubCategory = subCategoryService.updateSubCategory(id, subCategorySaveRequestDTO);
             return ResponseEntity.status(HttpStatus.OK).body(updatedSubCategory);

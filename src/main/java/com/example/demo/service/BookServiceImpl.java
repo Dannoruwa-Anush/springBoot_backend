@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.dto.request.saveRequest.BookSaveRequestDTO;
+import com.example.demo.dto.request.BookRequestDTO;
 import com.example.demo.entity.Author;
 import com.example.demo.entity.Book;
 import com.example.demo.entity.SubCategory;
@@ -37,7 +37,7 @@ public class BookServiceImpl implements BookService {
     private static final Logger logger = LoggerFactory.getLogger(BookServiceImpl.class);
 
     // Helper class to validate book save/update request
-    private void validateBookSaveRequest(BookSaveRequestDTO bookSaveRequestDTO) {
+    private void validateBookSaveRequest(BookRequestDTO bookSaveRequestDTO) {
         if (bookSaveRequestDTO.getTitle() == null || bookSaveRequestDTO.getTitle().isEmpty()) {
             throw new IllegalArgumentException("Book title is required.");
         }
@@ -70,7 +70,7 @@ public class BookServiceImpl implements BookService {
     // ---
 
     @Override
-    public Book saveBook(BookSaveRequestDTO bookSaveRequestDTO) {
+    public Book saveBook(BookRequestDTO bookSaveRequestDTO) {
         validateBookSaveRequest(bookSaveRequestDTO); //validate requests
 
         //Get related author information of the book
@@ -101,7 +101,7 @@ public class BookServiceImpl implements BookService {
     // ---
 
     @Override
-    public Book updateBook(long id, BookSaveRequestDTO bookSaveRequestDTO) {
+    public Book updateBook(long id, BookRequestDTO bookSaveRequestDTO) {
 
         validateBookSaveRequest(bookSaveRequestDTO); //validate requests
 

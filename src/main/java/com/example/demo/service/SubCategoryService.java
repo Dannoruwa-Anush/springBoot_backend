@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.example.demo.dto.request.saveRequest.SubCategorySaveRequestDTO;
+import com.example.demo.dto.request.SubCategoryRequestDTO;
 import com.example.demo.entity.SubCategory;
 
 @Service
@@ -14,9 +14,9 @@ public interface SubCategoryService {
 
     SubCategory getSubCategoryById(long id);
 
-    SubCategory saveSubCategory(SubCategorySaveRequestDTO subCategorySaveRequestDTO);
+    SubCategory saveSubCategory(SubCategoryRequestDTO subCategorySaveRequestDTO);
 
-    SubCategory updateSubCategory(long id, SubCategorySaveRequestDTO subCategorySaveRequestDTO);
+    SubCategory updateSubCategory(long id, SubCategoryRequestDTO subCategorySaveRequestDTO);
 
     void deleteSubCategory(long id);
 }

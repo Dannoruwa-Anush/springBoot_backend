@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.common.customHttpResponse.CustomErrorResponse;
-import com.example.demo.dto.request.saveRequest.BookSaveRequestDTO;
+import com.example.demo.dto.request.BookRequestDTO;
 import com.example.demo.dto.response.BookResponseDTO;
 import com.example.demo.entity.Book;
 import com.example.demo.service.BookService;
@@ -82,7 +82,7 @@ public class BookController {
      * parameters, and uploaded files (multipart data) to a single object.
      */
     @PostMapping("/book")
-    public ResponseEntity<Object> createBook(@ModelAttribute BookSaveRequestDTO bookSaveRequestDTO) {
+    public ResponseEntity<Object> createBook(@ModelAttribute BookRequestDTO bookSaveRequestDTO) {
         try {
             Book savedBook = bookService.saveBook(bookSaveRequestDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedBook);
@@ -103,7 +103,7 @@ public class BookController {
      */
     @PutMapping("/book/{id}")
     public ResponseEntity<Object> updateBook(@PathVariable Long id,
-            @ModelAttribute BookSaveRequestDTO bookSaveRequestDTO) {
+            @ModelAttribute BookRequestDTO bookSaveRequestDTO) {
         try {
             Book updatedBook = bookService.updateBook(id, bookSaveRequestDTO);
             return ResponseEntity.status(HttpStatus.OK).body(updatedBook);
