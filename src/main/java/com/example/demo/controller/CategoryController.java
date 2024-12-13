@@ -68,9 +68,9 @@ public class CategoryController {
 
     
     @PostMapping
-    public ResponseEntity<Object> createCategory(@RequestBody Category Category){
+    public ResponseEntity<Object> createCategory(@RequestBody Category category){
         try {
-            Category savedCategory = categoryService.saveCategory(Category);
+            Category savedCategory = categoryService.saveCategory(category);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedCategory);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage()));
@@ -79,9 +79,9 @@ public class CategoryController {
     //---
 
     @PutMapping("{id}")
-    public ResponseEntity<Object> updateCategory(@PathVariable Long id, @RequestBody Category Category){
+    public ResponseEntity<Object> updateCategory(@PathVariable Long id, @RequestBody Category category){
         try {
-            Category updatedCategory = categoryService.updateCategory(id, Category);
+            Category updatedCategory = categoryService.updateCategory(id, category);
             return ResponseEntity.status(HttpStatus.OK).body(updatedCategory);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage()));
