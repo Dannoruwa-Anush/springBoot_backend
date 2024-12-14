@@ -5,18 +5,18 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.request.SubCategoryRequestDTO;
-import com.example.demo.entity.SubCategory;
+import com.example.demo.dto.response.SubCategoryResponseDTO;
 
 @Service
 public interface SubCategoryService {
     
-    List<SubCategory> getAllSubCategories();
+    List<SubCategoryResponseDTO> getAllSubCategories();
 
-    SubCategory getSubCategoryById(long id);
+    SubCategoryResponseDTO getSubCategoryById(long id);
 
-    SubCategory saveSubCategory(SubCategoryRequestDTO subCategorySaveRequestDTO);
+    SubCategoryResponseDTO saveSubCategory(SubCategoryRequestDTO subCategorySaveRequestDTO);
 
-    SubCategory updateSubCategory(long id, SubCategoryRequestDTO subCategorySaveRequestDTO);
+    SubCategoryResponseDTO updateSubCategory(long id, SubCategoryRequestDTO subCategorySaveRequestDTO);
 
     void deleteSubCategory(long id);
 }

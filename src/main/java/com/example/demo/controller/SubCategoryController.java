@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.common.customHttpResponse.CustomErrorResponse;
 import com.example.demo.dto.request.SubCategoryRequestDTO;
-import com.example.demo.entity.SubCategory;
+import com.example.demo.dto.response.SubCategoryResponseDTO;
 import com.example.demo.service.SubCategoryService;
 
 @RestController
@@ -44,8 +44,8 @@ public class SubCategoryController {
      //---
 
     @GetMapping
-    public ResponseEntity<List<SubCategory>> getAllSubCategories() {
-        List<SubCategory> subCategories = subCategoryService.getAllSubCategories();
+    public ResponseEntity<List<SubCategoryResponseDTO>> getAllSubCategories() {
+        List<SubCategoryResponseDTO> subCategories = subCategoryService.getAllSubCategories();
 
         if (subCategories.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -56,9 +56,9 @@ public class SubCategoryController {
     // ---
 
     @GetMapping("/{id}")
-    public ResponseEntity<SubCategory> getAllSubCategoryById(@PathVariable Long id) {
+    public ResponseEntity<SubCategoryResponseDTO> getAllSubCategoryById(@PathVariable Long id) {
         try {
-            SubCategory subCategory = subCategoryService.getSubCategoryById(id);
+            SubCategoryResponseDTO subCategory = subCategoryService.getSubCategoryById(id);
             return ResponseEntity.status(HttpStatus.OK).body(subCategory);
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
@@ -70,7 +70,7 @@ public class SubCategoryController {
     public ResponseEntity<Object> createSubCategory(@RequestBody SubCategoryRequestDTO subCategorySaveRequestDTO) {
         
         try {
-            SubCategory savedSubCategory = subCategoryService.saveSubCategory(subCategorySaveRequestDTO);
+            SubCategoryResponseDTO savedSubCategory = subCategoryService.saveSubCategory(subCategorySaveRequestDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedSubCategory);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
@@ -83,7 +83,7 @@ public class SubCategoryController {
     @PutMapping("{id}")
     public ResponseEntity<Object> updateSubCategory(@PathVariable Long id, @RequestBody SubCategoryRequestDTO subCategorySaveRequestDTO) {
         try {
-            SubCategory updatedSubCategory = subCategoryService.updateSubCategory(id, subCategorySaveRequestDTO);
+            SubCategoryResponseDTO updatedSubCategory = subCategoryService.updateSubCategory(id, subCategorySaveRequestDTO);
             return ResponseEntity.status(HttpStatus.OK).body(updatedSubCategory);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
