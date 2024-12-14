@@ -36,7 +36,6 @@ public class RoleServiceImpl implements RoleService {
         responseDto.setId(role.getId());
         responseDto.setRoleName(role.getRoleName());
 
-        // Convert UserPermissions to DTOs
         // Convert UserPermissions to a set of names
         Set<String> userPermissionNames = role.getUserPermissions().stream() // Convert to stream
                 .map(UserPermission::getUserPermissionName) // Extract userPermissionName directly
