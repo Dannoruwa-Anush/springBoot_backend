@@ -37,7 +37,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public RoleResponseDTO toRoleResponseDTO(Role role) {
         RoleResponseDTO responseDto = new RoleResponseDTO();
-        responseDto.setRoleId(role.getId());
+        responseDto.setId(role.getId());
         responseDto.setRoleName(role.getRoleName());
 
         // Convert UserPermissions to DTOs

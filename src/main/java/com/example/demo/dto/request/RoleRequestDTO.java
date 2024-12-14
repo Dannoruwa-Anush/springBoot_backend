@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data //generate Getters and Setters using Lombok
 public class RoleRequestDTO {
+    //DTO specifies exactly what fields should be serialized.
     private String roleName;
     private Set<Long> permissionIds;
 }
