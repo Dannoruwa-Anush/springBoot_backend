@@ -2,8 +2,6 @@ package com.example.demo.entity;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -19,15 +17,26 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "books") //set table name
+@Table(name = "books") // set table name
 @NoArgsConstructor
 @AllArgsConstructor
-@Data //generate Getters and Setters using Lombok
+@Data // generate Getters and Setters using Lombok
 public class Book {
 
-    @Id //set primary key
-    @GeneratedValue(strategy = GenerationType.IDENTITY) //generate the primary key value by the database itself using the auto-increment column option
-    private Long id; //primary key
+    // Define columns in table
+
+    /*
+     * @JsonIgnore : prevent this attribute from being included in the JSON output.
+     * private DataType attributeName;
+     * 
+     * Don't use @JsonIgnore in the entity level beacuse it's better to isolate the
+     * serialization concerns from the entity logic, which is where DTOs help.
+     * 
+     * DTO specifies exactly what fields should be serialized.
+     */
+    @Id // set primary key
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id; // primary key
 
     @Column(nullable = false)
     private String title;
@@ -36,30 +45,33 @@ public class Book {
     private double unitPrice;
 
     @Column(nullable = false)
-    private int qoh;//Quantity on hand
+    private int qoh;// Quantity on hand
 
     @Column(name = "cover_image", nullable = false)
-    private String coverImage; //path for coverImage
+    private String coverImage; // path for coverImage
 
-    //Book (Many) ---  (One) SubCategory
-    //Book side relationship
-    //FK : id ->SubCategory
-    @ManyToOne(fetch = FetchType.LAZY) //LAZY: This means that the related entities (Category) will not be fetched immediately when the parent entity (SubCategory) is loaded. 
-    @JoinColumn(name = "sub_category_id", nullable = false)  // Foreign key column
-    @JsonIgnore //prevent this property from being included in the JSON output.
+    /*
+     * LAZY: This means that the related entities (in the Many-to-Many relationship)
+     * will not be fetched immediately when the parent entity is loaded.
+     */
+
+    // Book (Many) --- (One) SubCategory
+    // Book side relationship
+    // FK : id ->SubCategory
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sub_category_id", nullable = false) // Foreign key column
     private SubCategory subCategory;
 
-    //Author (one) ---  (Many) Book
-    //FK : id ->Author
-    //Author side relationship
-    @ManyToOne(fetch = FetchType.LAZY) //LAZY: This means that the related entities will not be fetched immediately when the parent entity is loaded. 
-    @JoinColumn(name = "author_id", nullable = false)// Foreign key column
-    @JsonIgnore //prevent this property from being included in the JSON output.
+    // Author (one) --- (Many) Book
+    // FK : id ->Author
+    // Author side relationship
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id", nullable = false) // Foreign key column
     private Author author;
 
-    //Order (Many) ---  (Many) Book
-    //Book side relationship
-    @ManyToMany(mappedBy = "books") // books -> variable private List<Book> books; in Order.java
-    @JsonIgnore //prevent this property from being included in the JSON output.
+    // Order (Many) --- (Many) Book
+    // Book side relationship
+    // books -> variable private List<Book> books; in Order.java
+    @ManyToMany(mappedBy = "books")
     private List<Order> orders;
 }

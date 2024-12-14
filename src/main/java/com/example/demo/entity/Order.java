@@ -6,7 +6,6 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 import com.example.demo.common.projectEnum.OrderStatus;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -34,19 +33,28 @@ import lombok.NoArgsConstructor;
 @Data // generate Getters and Setters using Lombok
 public class Order {
 
+    // Define columns in table
+
+    /*
+     * @JsonIgnore : prevent this attribute from being included in the JSON output.
+     * private DataType attributeName;
+     * 
+     * Don't use @JsonIgnore in the entity level beacuse it's better to isolate the
+     * serialization concerns from the entity logic, which is where DTOs help.
+     * 
+     * DTO specifies exactly what fields should be serialized.
+     */
+
     @Id // set primary key
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // generate the primary key value by the database itself using
-                                                        // the auto-increment column option
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // primary key
 
     @Column(name = "total_amount", nullable = false)
     private double totalAmount;
 
-    @JsonIgnore // prevent this property from being included in the JSON output.
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @JsonIgnore // prevent this property from being included in the JSON output.
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
@@ -78,20 +86,20 @@ public class Order {
         this.updatedAt = zonedNowUtc.toLocalDateTime(); // Convert to LocalDateTime for storage
     }
 
+    /*
+     * LAZY: This means that the related entities (in the Many-to-Many relationship)
+     * will not be fetched immediately when the parent entity is loaded.
+     */
     // Order (Many) --- (Many) Book
     // Order side relationship
-    @ManyToMany(fetch = FetchType.LAZY) // LAZY: This means that the related entities (in the Many-to-Many relationship)
-                                        // will not be fetched immediately when the parent entity is loaded.
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "order_books", joinColumns = @JoinColumn(name = "order_id"), inverseJoinColumns = @JoinColumn(name = "book_id"))
-    @JsonIgnore // prevent this property from being included in the JSON output.
     private List<Book> books;
 
     // User (One) --- (Many) Order
     // FK : id ->User
     // Order side relationship
-    @ManyToOne(fetch = FetchType.LAZY) // LAZY: This means that the related entities (Category) will not be fetched
-                                       // immediately when the parent entity (SubCategory) is loaded.
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false) // Foreign key column
-    @JsonIgnore // prevent this property from being included in the JSON output.
     private User user;
 }

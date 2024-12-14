@@ -2,8 +2,6 @@ package com.example.demo.entity;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -22,22 +20,29 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data // generate Getters and Setters using Lombok
 public class Category {
+    // Define columns in table
 
+    /*
+     * @JsonIgnore : prevent this attribute from being included in the JSON output.
+     * private DataType attributeName;
+     * 
+     * Don't use @JsonIgnore in the entity level beacuse it's better to isolate the
+     * serialization concerns from the entity logic, which is where DTOs help.
+     * 
+     * DTO specifies exactly what fields should be serialized.
+     */
+
+    /*
+     * @GeneratedValue
+     * generate the primary key value by the database itself using the
+     * auto-increment column option
+     */
     @Id // set primary key
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // generate the primary key value by the database itself using
-                                                        // the auto-increment column option
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // primary key
 
-    @Column(name="category_name", nullable = false, unique = true)
+    @Column(name = "category_name", nullable = false, unique = true)
     private String categoryName;
-
-    // Category (one) -- (Many) SubCategory
-    // Category side relationship
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true) // category -> variable "private
-                                                                                       // Category category;" in the
-                                                                                       // SubCategory.java
-    @JsonIgnore //prevent this property from being included in the JSON output.
-    private List<SubCategory> subcategories;
 
     /*
      * Parent Entity: The entity on the "one" side of the relationship.
@@ -53,4 +58,12 @@ public class Category {
      * the child entity becomes an "orphan," and if it's no longer associated with
      * any parent, it is removed from the database.
      */
+
+    // Category (one) -- (Many) SubCategory
+    // Category side relationship
+    /*
+     * category -> variable "private Category category;" in the SubCategory.java
+     */
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SubCategory> subcategories;
 }
