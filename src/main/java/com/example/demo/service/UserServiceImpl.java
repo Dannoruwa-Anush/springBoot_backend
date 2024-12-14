@@ -3,9 +3,12 @@ package com.example.demo.service;
 import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -46,6 +49,7 @@ public class UserServiceImpl implements UserService {
    @Autowired
    JwtUtils jwtUtils;
 
+   private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class); 
    // ---
    @Override
    public List<User> getAllUsers() {
@@ -86,7 +90,13 @@ public class UserServiceImpl implements UserService {
    // ---
    @Override
    public void deleteUser(long id) {
+      Optional<User> existingUser = userRepository.findById(id);
+
+      if(!existingUser.isPresent()){
+         throw new IllegalArgumentException("User is not found with id: " + id);
+      }
       userRepository.deleteById(id);
+      logger.info("User with id {} was deleted.", id);
    }
    // ---
 

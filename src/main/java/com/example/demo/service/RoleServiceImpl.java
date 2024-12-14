@@ -6,6 +6,8 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +27,8 @@ public class RoleServiceImpl implements RoleService {
 
     @Autowired
     private UserPermissionRepository userPermissionRepository;
+
+    private static final Logger logger = LoggerFactory.getLogger(RoleServiceImpl.class);
 
     @Override
     public List<Role> getAllRoles() {
@@ -48,6 +52,10 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public Role updateRole(long id, Role role) {
         Role existingRole = getRoleById(id);
+
+        if((existingRole.getRoleName().equals(role.getRoleName()))){
+            throw new IllegalArgumentException("Role with name '" + role.getRoleName() + "' already exists.");
+        }
         existingRole.setRoleName(role.getRoleName());
 
         return roleRepository.save(existingRole);
@@ -55,7 +63,14 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public void deleteRole(long id) {
+        Optional<Role> existingRole = roleRepository.findById(id);
+
+        if(!existingRole.isPresent()){
+            throw new IllegalArgumentException("Role is not found with id: " + id);
+        }
+        
         roleRepository.deleteById(id);
+        logger.info("Role with id {} was deleted.", id);
     }
 
     // role - userPermission Assignment
