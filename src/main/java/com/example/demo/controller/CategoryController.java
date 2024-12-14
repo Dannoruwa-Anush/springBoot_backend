@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.common.customHttpResponse.CustomErrorResponse;
-import com.example.demo.entity.Category;
+import com.example.demo.dto.request.CategoryRequestDTO;
+import com.example.demo.dto.response.CategoryResponseDTO;
 import com.example.demo.service.CategoryService;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -44,8 +45,8 @@ public class CategoryController {
      */
 
     @GetMapping
-    public ResponseEntity<List<Category>> getAllCategories() {
-        List<Category> categories = categoryService.getAllCategories();
+    public ResponseEntity<List<CategoryResponseDTO>> getAllCategories() {
+        List<CategoryResponseDTO> categories = categoryService.getAllCategories();
 
         if (categories.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -56,9 +57,9 @@ public class CategoryController {
     //---
 
     @GetMapping("/{id}")
-    public ResponseEntity<Category> getAllCategoryById(@PathVariable Long id){
+    public ResponseEntity<CategoryResponseDTO> getAllCategoryById(@PathVariable Long id){
         try {
-            Category category = categoryService.getCategoryById(id);
+            CategoryResponseDTO category = categoryService.getCategoryById(id);
             return ResponseEntity.status(HttpStatus.OK).body(category);
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
@@ -70,9 +71,9 @@ public class CategoryController {
 
     
     @PostMapping
-    public ResponseEntity<Object> createCategory(@RequestBody Category category){
+    public ResponseEntity<Object> createCategory(@RequestBody CategoryRequestDTO categoryRequestDTO){
         try {
-            Category savedCategory = categoryService.saveCategory(category);
+            CategoryResponseDTO savedCategory = categoryService.saveCategory(categoryRequestDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedCategory);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
@@ -83,9 +84,9 @@ public class CategoryController {
     //---
 
     @PutMapping("{id}")
-    public ResponseEntity<Object> updateCategory(@PathVariable Long id, @RequestBody Category category){
+    public ResponseEntity<Object> updateCategory(@PathVariable Long id, @RequestBody CategoryRequestDTO categoryRequestDTO){
         try {
-            Category updatedCategory = categoryService.updateCategory(id, category);
+            CategoryResponseDTO updatedCategory = categoryService.updateCategory(id, categoryRequestDTO);
             return ResponseEntity.status(HttpStatus.OK).body(updatedCategory);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
