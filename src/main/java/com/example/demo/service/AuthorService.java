@@ -4,18 +4,19 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.example.demo.entity.Author;
+import com.example.demo.dto.request.AuthorRequestDTO;
+import com.example.demo.dto.response.AuthorResponseDTO;
 
 @Service
 public interface AuthorService {
 
-    List<Author> getAllAuthors();
+    List<AuthorResponseDTO> getAllAuthors();
 
-    Author getAuthorById(long id);
+    AuthorResponseDTO getAuthorById(long id);
 
-    Author saveAuthor(Author author);
+    AuthorResponseDTO saveAuthor(AuthorRequestDTO authorRequestDTO);
 
-    Author updateAuthor(long id, Author author);
+    AuthorResponseDTO updateAuthor(long id, AuthorRequestDTO authorRequestDTO);
 
     void deleteAuthor(long id);
 }

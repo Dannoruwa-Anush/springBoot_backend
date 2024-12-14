@@ -16,7 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.common.customHttpResponse.CustomErrorResponse;
-import com.example.demo.entity.Author;
+import com.example.demo.dto.request.AuthorRequestDTO;
+import com.example.demo.dto.response.AuthorResponseDTO;
 import com.example.demo.service.AuthorService;
 
 @RestController
@@ -41,8 +42,8 @@ public class AuthorController {
      */
 
     @GetMapping
-    public ResponseEntity<List<Author>> getAllAuthors() {
-        List<Author> authors = authorService.getAllAuthors();
+    public ResponseEntity<List<AuthorResponseDTO>> getAllAuthors() {
+        List<AuthorResponseDTO> authors = authorService.getAllAuthors();
 
         if (authors.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -53,9 +54,9 @@ public class AuthorController {
     // ---
 
     @GetMapping("/{id}")
-    public ResponseEntity<Author> getAllAuthorById(@PathVariable Long id) {
+    public ResponseEntity<AuthorResponseDTO> getAllAuthorById(@PathVariable Long id) {
         try {
-            Author author = authorService.getAuthorById(id);
+            AuthorResponseDTO author = authorService.getAuthorById(id);
             return ResponseEntity.status(HttpStatus.OK).body(author);
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
@@ -66,9 +67,9 @@ public class AuthorController {
     // ---
 
     @PostMapping
-    public ResponseEntity<Object> createAuthor(@RequestBody Author author) {
+    public ResponseEntity<Object> createAuthor(@RequestBody AuthorRequestDTO authorRequestDTO) {
         try {
-            Author savedAuthor = authorService.saveAuthor(author);
+            AuthorResponseDTO savedAuthor = authorService.saveAuthor(authorRequestDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedAuthor);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
@@ -79,9 +80,9 @@ public class AuthorController {
     // ---
 
     @PutMapping("{id}")
-    public ResponseEntity<Object> updateAuthor(@PathVariable Long id, @RequestBody Author author) {
+    public ResponseEntity<Object> updateAuthor(@PathVariable Long id, @RequestBody AuthorRequestDTO authorRequestDTO) {
         try {
-            Author updatedAuthor = authorService.updateAuthor(id, author);
+            AuthorResponseDTO updatedAuthor = authorService.updateAuthor(id, authorRequestDTO);
             return ResponseEntity.status(HttpStatus.OK).body(updatedAuthor);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
