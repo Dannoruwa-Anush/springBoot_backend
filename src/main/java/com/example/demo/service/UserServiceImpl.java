@@ -3,7 +3,6 @@ package com.example.demo.service;
 import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -19,11 +18,13 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.common.customException.FirstLoginCustomException;
 import com.example.demo.dto.request.CustomerRegistrationDTO;
-import com.example.demo.dto.request.UserLoginDTO;
+import com.example.demo.dto.request.UserFindRequestDTO;
+import com.example.demo.dto.request.UserLoginRequestDTO;
 import com.example.demo.dto.request.UserPaswordResetRequestDTO;
-import com.example.demo.dto.request.UserStaffRegistrationDTO;
+import com.example.demo.dto.request.UserRequestDTO;
+import com.example.demo.dto.request.UserStaffRegistrationRequestDTO;
 import com.example.demo.dto.response.JwtResponseDTO;
-import com.example.demo.dto.response.UserDTO;
+import com.example.demo.dto.response.UserResponseDTO;
 import com.example.demo.entity.Role;
 import com.example.demo.entity.User;
 import com.example.demo.repository.RoleRepository;
@@ -33,7 +34,6 @@ import com.example.demo.security.jwt.JwtUtils;
 @Service
 public class UserServiceImpl implements UserService {
 
-   // Call UserRepository to implement service
    @Autowired
    private UserRepository userRepository;
 
@@ -49,50 +49,63 @@ public class UserServiceImpl implements UserService {
    @Autowired
    JwtUtils jwtUtils;
 
-   private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class); 
+   private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+
+   // ***
+   private UserResponseDTO toUserResponseDTO(User user) {
+      UserResponseDTO dto = new UserResponseDTO();
+      dto.setId(user.getId());
+      dto.setUsername(user.getUsername());
+      dto.setEmail(user.getEmail());
+      dto.setAddress(user.getAddress());
+      dto.setTelephoneNumber(user.getTelephoneNumber());
+
+      Set<String> userRoleNames = user.getRoles().stream().map(Role::getRoleName).collect(Collectors.toSet());
+      dto.setRoleNames(userRoleNames);
+
+      return dto;
+   }
+   // ***
+
    // ---
    @Override
-   public List<User> getAllUsers() {
-      return userRepository.findAll();
+   public List<UserResponseDTO> getAllUsers() {
+      List<User> users = userRepository.findAll();
+      List<UserResponseDTO> userResponseDTOs = users.stream().map(this::toUserResponseDTO).collect(Collectors.toList());
+      return userResponseDTOs;
    }
    // ---
 
    // ---
    @Override
-   public User getUserById(long id) {
-      return userRepository.findById(id).orElseThrow(() -> new NoSuchElementException("User is not found" + id));
+   public UserResponseDTO getUserById(long id) {
+      User user = userRepository.findById(id).orElseThrow(() -> new NoSuchElementException("User is not found" + id));
+      return toUserResponseDTO(user);
    }
    // ---
 
    // ---
    @Override
-   public User saveUser(User user) {
-      return userRepository.save(user);
-   }
-   // ---
-
-   // ---
-   @Override
-   public User updateUserProfile(long id, UserDTO userDTO) {
+   public UserResponseDTO updateUserProfile(long id, UserRequestDTO userRequestDTO) {
       // get existing user
-      User existingUser = getUserById(id);
+      User existingUser = userRepository.findById(id)
+            .orElseThrow(() -> new NoSuchElementException("User is not found" + id));
 
       // change existing user according to our requirement
-      existingUser.setUsername(userDTO.getUsername());
-      existingUser.setAddress(userDTO.getAddress());
-      existingUser.setTelephoneNumber(userDTO.getTelephoneNumber());
-      existingUser.setEmail(userDTO.getEmail());
+      existingUser.setUsername(userRequestDTO.getUsername());
+      existingUser.setAddress(userRequestDTO.getAddress());
+      existingUser.setTelephoneNumber(userRequestDTO.getTelephoneNumber());
+      existingUser.setEmail(userRequestDTO.getEmail());
+      // Role update is not allowed for any user.
 
-      return userRepository.save(existingUser);
+      return toUserResponseDTO(userRepository.save(existingUser));
    }
    // ---
 
    // ---
    @Override
    public void deleteUser(long id) {
-      Optional<User> existingUser = userRepository.findById(id);
-
-      if(!existingUser.isPresent()){
+      if (!userRepository.existsById(id)) {
          throw new IllegalArgumentException("User is not found with id: " + id);
       }
       userRepository.deleteById(id);
@@ -104,11 +117,11 @@ public class UserServiceImpl implements UserService {
    @Override
    public boolean isPasswordReset(UserPaswordResetRequestDTO userPaswordResetRequestDTO) {
       // get existing user
-      User existingUser = getUserById(userPaswordResetRequestDTO.getId());
+      User existingUser = userRepository.findById(userPaswordResetRequestDTO.getId())
+            .orElseThrow(() -> new NoSuchElementException("User is not found" + userPaswordResetRequestDTO.getId()));
 
-      existingUser.setPassword(passwordEncoder.encode(userPaswordResetRequestDTO.getNewPassword())); // Encode temporary
-                                                                                                     // password before
-                                                                                                     // setting
+      // Encode temporary password before setting
+      existingUser.setPassword(passwordEncoder.encode(userPaswordResetRequestDTO.getNewPassword()));
       existingUser.setFirstLogin(false); // Update the firstLogin flag to false
 
       // save user
@@ -120,14 +133,16 @@ public class UserServiceImpl implements UserService {
 
    // ---
    @Override
-   public boolean addStaff(UserStaffRegistrationDTO userStaffRegistrationDTO) {
+   public UserResponseDTO addStaff(UserStaffRegistrationRequestDTO userStaffRegistrationDTO) {
 
       if (userRepository.existsByUsername(userStaffRegistrationDTO.getUsername())) {
-         throw new IllegalArgumentException("This username is already taken");
+         throw new IllegalArgumentException(
+               "The username '" + userStaffRegistrationDTO.getUsername() + "' is already taken.");
       }
 
       if (userRepository.existsByEmail(userStaffRegistrationDTO.getEmail())) {
-         throw new IllegalArgumentException("This email already in use");
+         throw new IllegalArgumentException(
+               "The email '" + userStaffRegistrationDTO.getEmail() + "' is already in use.");
       }
 
       User staffUser = new User();
@@ -141,33 +156,43 @@ public class UserServiceImpl implements UserService {
       staffUser.setAddress(userStaffRegistrationDTO.getAddress());
       staffUser.setTelephoneNumber(userStaffRegistrationDTO.getTelephoneNumber());
 
+      // Assign requested roles for new staff member
       Set<Role> roles = new HashSet<>();
 
-      for (String roleName : userStaffRegistrationDTO.getExpectingRoles()) {
-         Role role = roleRepository.findByRoleName(roleName)
-               .orElseThrow(() -> new RuntimeException("Role " + roleName + " not found"));
+      for (Long roleId : userStaffRegistrationDTO.getExpectingRoleIds()) {
+         Role role = roleRepository.findById(roleId)
+               .orElseThrow(() -> new IllegalArgumentException("Role is not found : " + roleId));
+
+         // Validate roles
+         if ("Admin".equals(role.getRoleName()) || "Customer".equals(role.getRoleName())) {
+            throw new IllegalArgumentException("Unauthorized role assignment: '" + role.getRoleName() + "'.");
+         }
+
          roles.add(role);
       }
+
       staffUser.setRoles(roles);
 
       userRepository.save(staffUser);
 
-      return true;
+      return toUserResponseDTO(staffUser);
    }
    // ---
 
    // ---
    @Override
-   public boolean addCustomer(CustomerRegistrationDTO customerRegistrationDTO) {
+   public UserResponseDTO addCustomer(CustomerRegistrationDTO customerRegistrationDTO) {
 
       // Check if the username already exists
       if (userRepository.existsByUsername(customerRegistrationDTO.getUsername())) {
-         throw new IllegalArgumentException("This username is already taken");
+         throw new IllegalArgumentException(
+               "The username '" + customerRegistrationDTO.getUsername() + "' is already taken.");
       }
 
       // Check if the email already exists
       if (userRepository.existsByEmail(customerRegistrationDTO.getEmail())) {
-         throw new IllegalArgumentException("This email is already in use");
+         throw new IllegalArgumentException(
+               "The email '" + customerRegistrationDTO.getEmail() + "' is already in use.");
       }
 
       // Roles are set as ["Customer"] at user registration
@@ -198,13 +223,13 @@ public class UserServiceImpl implements UserService {
       // Save the new customer user
       userRepository.save(newCustomer);
 
-      return true;
+      return toUserResponseDTO(newCustomer);
    }
    // ---
 
    // ---
    @Override
-   public JwtResponseDTO loginUser(UserLoginDTO loginRequest) {
+   public JwtResponseDTO loginUser(UserLoginRequestDTO loginRequest) {
       // Authenticate user
       Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
@@ -234,6 +259,15 @@ public class UserServiceImpl implements UserService {
             jwtToken, user.getId(), user.getUsername(), user.getEmail(), roleNames);
 
       return jwtResponseDTO;
+   }
+   // ---
+
+   // ---
+   @Override
+   public UserResponseDTO getUserByUsername(UserFindRequestDTO userFindRequestDTO) {
+      User user = userRepository.findByUsername(userFindRequestDTO.getUsername()).orElseThrow(() -> new NoSuchElementException("User is not found bu username :" + userFindRequestDTO.getUsername()));
+      
+      return toUserResponseDTO(user);
    }
    // ---
 }

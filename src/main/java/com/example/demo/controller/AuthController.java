@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.common.customException.FirstLoginCustomException;
 import com.example.demo.dto.request.CustomerRegistrationDTO;
-import com.example.demo.dto.request.UserLoginDTO;
+import com.example.demo.dto.request.UserFindRequestDTO;
+import com.example.demo.dto.request.UserLoginRequestDTO;
 import com.example.demo.dto.request.UserPaswordResetRequestDTO;
+import com.example.demo.dto.response.UserResponseDTO;
 import com.example.demo.service.UserService;
 
 @RestController
@@ -27,14 +29,13 @@ public class AuthController {
     @Autowired
     PasswordEncoder passwordEncoder;
 
-    // ---
     @PostMapping("/auth/register")
-    public ResponseEntity<?> registerUser(@RequestBody CustomerRegistrationDTO customerRegistrationDTO) {
+    public ResponseEntity<Object> registerUser(@RequestBody CustomerRegistrationDTO customerRegistrationDTO) {
         try {
-            userService.addCustomer(customerRegistrationDTO);
+            UserResponseDTO userResponseDTO = userService.addCustomer(customerRegistrationDTO);
 
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(Map.of("message", "User account successfully created", "status", HttpStatus.CREATED.value()));
+                    .body(Map.of("message", "User account successfully created", "status", HttpStatus.CREATED.value(),"response", userResponseDTO));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("error", e.getMessage(), "status", HttpStatus.BAD_REQUEST.value()));
@@ -49,9 +50,8 @@ public class AuthController {
     }
     // ---
 
-    // ---
     @PostMapping("/auth/login")
-    public ResponseEntity<?> loginUser(@RequestBody UserLoginDTO loginRequest) {
+    public ResponseEntity<Object> loginUser(@RequestBody UserLoginRequestDTO loginRequest) {
         try {
             return ResponseEntity.ok(userService.loginUser(loginRequest));
         } catch (FirstLoginCustomException e) {
@@ -75,9 +75,8 @@ public class AuthController {
     }
     // ---
 
-    // Update user password
     @PutMapping("/auth/password-reset")
-    public ResponseEntity<?> resetPassword(@RequestBody UserPaswordResetRequestDTO userPaswordResetRequestDTO) {
+    public ResponseEntity<Object> resetPassword(@RequestBody UserPaswordResetRequestDTO userPaswordResetRequestDTO) {
         try {
             userService.isPasswordReset(userPaswordResetRequestDTO);
             return ResponseEntity.status(HttpStatus.OK)
@@ -92,8 +91,20 @@ public class AuthController {
 
     // ---
     @GetMapping("/auth/password-reset-page")
-    public ResponseEntity<?> showPasswordResetPage() {
+    public ResponseEntity<Object> showPasswordResetPage() {
         return ResponseEntity.ok("Please enter your new password.");
     }
     // ---
+
+    @PostMapping("/auth/userRecovery")
+    public ResponseEntity<UserResponseDTO> getUserByUsername(@RequestBody UserFindRequestDTO userFindRequestDTO) {
+        try {
+            UserResponseDTO user = userService.getUserByUsername(userFindRequestDTO);
+            return ResponseEntity.status(HttpStatus.OK).body(user);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 }

@@ -3,7 +3,6 @@ package com.example.demo.controller;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,31 +10,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.common.customHttpResponse.CustomErrorResponse;
-import com.example.demo.dto.request.UserStaffRegistrationDTO;
-import com.example.demo.dto.response.UserDTO;
-import com.example.demo.entity.User;
+import com.example.demo.dto.request.UserRequestDTO;
+import com.example.demo.dto.request.UserStaffRegistrationRequestDTO;
+import com.example.demo.dto.response.UserResponseDTO;
 import com.example.demo.service.UserService;
 
 @RestController
-@RequestMapping("/users") // set table name
+@RequestMapping("/user") // set table name
 public class UserController {
 
     @Autowired
     private UserService userService;
 
-    private UserDTO toDTO(User user) {
-        UserDTO dto = new UserDTO();
-        dto.setId(user.getId());
-        dto.setUsername(user.getUsername());
-        dto.setEmail(user.getEmail());
-        dto.setAddress(user.getAddress());
-        dto.setTelephoneNumber(user.getTelephoneNumber());
-
-        return dto;
-    }
-    // ---
-
-        /*
+    /*
      * ResponseEntity is a powerful class in Spring Boot for managing HTTP
      * responses.
      * 
@@ -49,43 +36,39 @@ public class UserController {
      * without any associated content in the response body.
      */
 
-    // Get all users
     @GetMapping
-    public ResponseEntity<List<UserDTO>> getAllUsers() {
-        List<User> users = userService.getAllUsers();
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
+        List<UserResponseDTO> users = userService.getAllUsers();
 
-        if(users.isEmpty()){
+        if (users.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
 
-        List<UserDTO> userResponseDTOs = users.stream().map(this::toDTO).collect(Collectors.toList());
-        return ResponseEntity.status(HttpStatus.OK).body(userResponseDTOs);
+        return ResponseEntity.status(HttpStatus.OK).body(users);
     }
     // ---
 
-    // Get user by ID
     @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getUserById(@PathVariable long id) {
+    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable long id) {
         try {
-            User user = userService.getUserById(id);
-            return ResponseEntity.status(HttpStatus.OK).body(toDTO(user));
+            UserResponseDTO user = userService.getUserById(id);
+            return ResponseEntity.status(HttpStatus.OK).body(user);
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }catch(Exception e){
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
     // ---
 
-    // Update user profile by ID
     @PutMapping("/{id}")
-    public ResponseEntity<Object> updateUserProfile(@PathVariable long id, @RequestBody UserDTO userDTO) {
+    public ResponseEntity<Object> updateUserProfile(@PathVariable long id, @RequestBody UserRequestDTO userRequestDTO) {
         try {
-            User updatedUser = userService.updateUserProfile(id, userDTO);
-            return ResponseEntity.status(HttpStatus.OK).body(toDTO(updatedUser));
-        }  catch (IllegalArgumentException e) {
+            UserResponseDTO updatedUser = userService.updateUserProfile(id, userRequestDTO);
+            return ResponseEntity.status(HttpStatus.OK).body(updatedUser);
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
-        }catch (NoSuchElementException e) {
+        } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User is not found");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
@@ -95,12 +78,12 @@ public class UserController {
 
     // add staff - this is alloacted for Admin role
     @PostMapping("/add-staff")
-    public ResponseEntity<Object> addStaff(@RequestBody UserStaffRegistrationDTO userStaffRegistrationDTO) {
+    public ResponseEntity<Object> addStaff(@RequestBody UserStaffRegistrationRequestDTO userStaffRegistrationRequestDTO) {
         try {
-            userService.addStaff(userStaffRegistrationDTO);
+            UserResponseDTO addedStaff = userService.addStaff(userStaffRegistrationRequestDTO);
 
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(Map.of("message", "Staff user successfully created", "status", HttpStatus.CREATED.value()));
+                    .body(Map.of("message", "Staff user successfully created", "status", HttpStatus.CREATED.value(), "response", addedStaff));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("error", e.getMessage(), "status", HttpStatus.BAD_REQUEST.value()));

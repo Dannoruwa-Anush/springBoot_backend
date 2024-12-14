@@ -9,11 +9,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data // generate Getters and Setters using Lombok
-public class UserStaffRegistrationDTO {
+public class UserStaffRegistrationRequestDTO {
     
     private String username;
     private String email;
     private String address;
     private String telephoneNumber;
-    private Set<String> expectingRoles;
+    private Set<Long> expectingRoleIds;
 }
