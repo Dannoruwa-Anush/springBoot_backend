@@ -24,14 +24,17 @@ public class UserPermissionServiceImpl implements UserPermissionService {
     private static final Logger logger = LoggerFactory.getLogger(UserPermissionServiceImpl.class);
 
     // ********
-    private UserPermissionResponseDTO toResponseDTO(UserPermission userPermission) {
+    @Override
+    public UserPermissionResponseDTO toUserPermissionResponseDTO(UserPermission userPermission) {
         UserPermissionResponseDTO dto = new UserPermissionResponseDTO();
         dto.setId(userPermission.getId());
         dto.setUserPermissionName(userPermission.getUserPermissionName());
         return dto;
     }
+    //---
 
-    private UserPermission toEntity(UserPermissionRequestDTO dto) {
+    @Override
+    public UserPermission toUserPermissionEntity(UserPermissionRequestDTO dto) {
         UserPermission userPermission = new UserPermission();
         userPermission.setUserPermissionName(dto.getUserPermissionName());
         return userPermission;
@@ -41,18 +44,20 @@ public class UserPermissionServiceImpl implements UserPermissionService {
     @Override
     public List<UserPermissionResponseDTO> getAllUserPermissions() {
         List<UserPermission> userPermissions = userPermissionRepository.findAll();
-        List<UserPermissionResponseDTO> userPermissionDTOs = userPermissions.stream().map(this::toResponseDTO)
+        List<UserPermissionResponseDTO> userPermissionDTOs = userPermissions.stream().map(this::toUserPermissionResponseDTO)
                 .collect(Collectors.toList());
         return userPermissionDTOs;
     }
+    //---
 
     @Override
     public UserPermissionResponseDTO getUserPermissionById(long id) {
         UserPermission userPermission = userPermissionRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Permission is not found " + id));
 
-        return toResponseDTO(userPermission);
+        return toUserPermissionResponseDTO(userPermission);
     }
+    //---
 
     @Override
     public UserPermissionResponseDTO saveUserPermission(UserPermissionRequestDTO userPermissionRequestDTO) {
@@ -64,10 +69,11 @@ public class UserPermissionServiceImpl implements UserPermissionService {
         }
 
         // convert dto to entity before save
-        UserPermission saveToUserPermission = toEntity(userPermissionRequestDTO);
+        UserPermission saveToUserPermission = toUserPermissionEntity(userPermissionRequestDTO);
 
-        return toResponseDTO(userPermissionRepository.save(saveToUserPermission));
+        return toUserPermissionResponseDTO(userPermissionRepository.save(saveToUserPermission));
     }
+    //---
 
     @Override
     public UserPermissionResponseDTO updateUserPermission(long id, UserPermissionRequestDTO userPermissionRequestDTO) {
@@ -84,8 +90,9 @@ public class UserPermissionServiceImpl implements UserPermissionService {
         // update
         existingUserPermission.setUserPermissionName(userPermissionRequestDTO.getUserPermissionName());
 
-        return toResponseDTO(userPermissionRepository.save(existingUserPermission));
+        return toUserPermissionResponseDTO(userPermissionRepository.save(existingUserPermission));
     }
+    //---
 
     @Override
     public void deleteRole(long id) {
@@ -95,4 +102,5 @@ public class UserPermissionServiceImpl implements UserPermissionService {
         userPermissionRepository.deleteById(id);
         logger.info("Permission with id {} was deleted.", id);
     }
+    //---
 }

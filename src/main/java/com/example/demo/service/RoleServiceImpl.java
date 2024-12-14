@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,12 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.request.RoleRequestDTO;
+import com.example.demo.dto.response.RoleResponseDTO;
+import com.example.demo.dto.response.UserPermissionResponseDTO;
 import com.example.demo.entity.Role;
 import com.example.demo.entity.UserPermission;
 import com.example.demo.repository.RoleRepository;
 import com.example.demo.repository.UserPermissionRepository;
-
-import jakarta.transaction.Transactional;
 
 @Service
 public class RoleServiceImpl implements RoleService {
@@ -28,125 +29,121 @@ public class RoleServiceImpl implements RoleService {
     @Autowired
     private UserPermissionRepository userPermissionRepository;
 
+    @Autowired
+    private UserPermissionService userPermissionService; // to use DTO Convertor
+
     private static final Logger logger = LoggerFactory.getLogger(RoleServiceImpl.class);
 
+    // ****
     @Override
-    public List<Role> getAllRoles() {
-        return roleRepository.findAll();
+    public RoleResponseDTO toRoleResponseDTO(Role role) {
+        RoleResponseDTO responseDto = new RoleResponseDTO();
+        responseDto.setRoleId(role.getId());
+        responseDto.setRoleName(role.getRoleName());
+
+        // Convert UserPermissions to DTOs
+        Set<UserPermissionResponseDTO> userPermissionDTOs = role.getUserPermissions().stream()
+                .map(userPermissionService::toUserPermissionResponseDTO)
+                .collect(Collectors.toSet());
+
+        responseDto.setUserPermissions(userPermissionDTOs);
+
+        return responseDto;
     }
+    //---
 
     @Override
-    public Role getRoleById(long id) {
-        return roleRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Role is not found " + id));
+    public Role toRoleEntity(RoleRequestDTO dto) {
+        Role role = new Role();
+        role.setRoleName(dto.getRoleName());
+
+        // Fetch and set permissions
+        List<UserPermission> requestPermissionList = userPermissionRepository.findAllById(dto.getPermissionIds());
+
+        // Use a temporary set to safely handle permissions
+        Set<UserPermission> requestPermissionSet = new HashSet<>(requestPermissionList);
+        role.setUserPermissions(requestPermissionSet);
+
+        return role;
     }
+    // ****
 
     @Override
-    public Role saveRole(Role role) {
-        Optional<Role> existingRole = roleRepository.findByRoleName(role.getRoleName());
+    public List<RoleResponseDTO> getAllRoles() {
+        List<Role> roles = roleRepository.findAll();
+        List<RoleResponseDTO> roleDTOs = roles.stream().map(this::toRoleResponseDTO)
+                .collect(Collectors.toList());
+        return roleDTOs;
+    }
+    //---
+
+    @Override
+    public RoleResponseDTO getRoleById(long id) {
+        Role role = roleRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Role is not found " + id));
+        return toRoleResponseDTO(role);
+    }
+    //---
+
+    @Override
+    public RoleResponseDTO saveRole(RoleRequestDTO roleRequestDTO) {
+        Optional<Role> existingRole = roleRepository.findByRoleName(roleRequestDTO.getRoleName());
         if (existingRole.isPresent()) {
-            throw new IllegalArgumentException("Role with name '" + role.getRoleName() + "' already exists.");
+            throw new IllegalArgumentException("Role with name '" + roleRequestDTO.getRoleName() + "' already exists.");
         }
-        return roleRepository.save(role);
+
+        // convert dto to entity
+        Role saveToRole = toRoleEntity(roleRequestDTO);
+        return toRoleResponseDTO(roleRepository.save(saveToRole));
     }
+    //---
 
     @Override
-    public Role updateRole(long id, Role role) {
-        Role existingRole = getRoleById(id);
+    public RoleResponseDTO updateRole(long id, RoleRequestDTO roleRequestDTO) {
+        // Retrieve the existing role
+        Role existingRole = roleRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Role is not found with ID: " + id));
 
-        if((existingRole.getRoleName().equals(role.getRoleName()))){
-            throw new IllegalArgumentException("Role with name '" + role.getRoleName() + "' already exists.");
+        // Check if the role name is being updated to one that already exists
+        if (!existingRole.getRoleName().equals(roleRequestDTO.getRoleName()) &&
+                roleRepository.findByRoleName(roleRequestDTO.getRoleName()).isPresent()) {
+            throw new IllegalArgumentException("Role with name '" + roleRequestDTO.getRoleName() + "' already exists.");
         }
-        existingRole.setRoleName(role.getRoleName());
 
-        return roleRepository.save(existingRole);
+        // Update the role name
+        existingRole.setRoleName(roleRequestDTO.getRoleName());
+
+        // Fetch the requested permissions
+        Set<UserPermission> requestedPermissions = new HashSet<>(
+                userPermissionRepository.findAllById(roleRequestDTO.getPermissionIds()));
+
+        // Update permissions:
+        // 1. Add new permissions from the request
+        requestedPermissions.forEach(permission -> {
+            if (!existingRole.getUserPermissions().contains(permission)) {
+                existingRole.getUserPermissions().add(permission);
+            }
+        });
+
+        // 2. Remove permissions not in the request
+        existingRole.getUserPermissions().removeIf(permission -> !requestedPermissions.contains(permission));
+
+        // Save the updated role
+        Role updatedRole = roleRepository.save(existingRole);
+
+        // Convert to DTO and return
+        return toRoleResponseDTO(updatedRole);
     }
+    //---
 
     @Override
     public void deleteRole(long id) {
-        Optional<Role> existingRole = roleRepository.findById(id);
-
-        if(!existingRole.isPresent()){
+        if (!roleRepository.existsById(id)) {
             throw new IllegalArgumentException("Role is not found with id: " + id);
         }
-        
+
         roleRepository.deleteById(id);
         logger.info("Role with id {} was deleted.", id);
     }
-
-    // role - userPermission Assignment
-
-    @Override
-    public Role saveOrUpdateRoleWithPermissions(RoleRequestDTO roleRequest) {
-        Role createOrUpdateRole;
-
-        // Determine whether to update an existing role or create a new one
-        if (roleRequest.getRoleId() != null) {
-            // Fetch the existing role to update
-            createOrUpdateRole = getRoleById(roleRequest.getRoleId());
-        } else {
-            // Create a new role if no ID is provided
-            createOrUpdateRole = new Role();
-            createOrUpdateRole.setId(null); //DB will set this automatically
-            createOrUpdateRole.setRoleName(roleRequest.getRoleName()); // Ensure roleName is set
-        }
-
-        // Fetch and set permissions
-        List<UserPermission> permissions = userPermissionRepository.findAllById(roleRequest.getPermissionIds());
-
-        // Use a temporary set to safely handle permissions
-        Set<UserPermission> updatedPermissions = new HashSet<>(permissions);
-
-        // Update the role's permissions
-        createOrUpdateRole.setUserPermissions(updatedPermissions);
-
-        // Save and return the updated or newly created role
-        return roleRepository.save(createOrUpdateRole);
-    }
-
-    @Override
-    public Role addPermissionsToExistingRole(RoleRequestDTO roleRequest) {
-        // Fetch the Role entity by its ID
-        Role role = getRoleById(roleRequest.getRoleId());
-
-        // Fetch the UserPermission entities by their IDs
-        List<UserPermission> permissions = userPermissionRepository.findAllById(roleRequest.getPermissionIds());
-
-        // Use a temporary collection to avoid ConcurrentModificationException
-        Set<UserPermission> existingPermissions = new HashSet<>(role.getUserPermissions());
-
-        // Add all permissions to the temporary collection
-        existingPermissions.addAll(permissions);
-
-        // Replace the original collection with the updated one
-        role.setUserPermissions(existingPermissions);
-
-        // Save and return the updated Role
-        return roleRepository.save(role);
-    }
-
-    @Override
-    @Transactional
-    public Role removePermissionsFromExistingRole(RoleRequestDTO roleRequest) {
-        Role role = getRoleById(roleRequest.getRoleId());
-
-        // Collect permissions to remove
-        Set<UserPermission> permissionsToRemove = new HashSet<>();
-
-        for (UserPermission permission : role.getUserPermissions()) {
-            if (roleRequest.getPermissionIds().contains(permission.getId())) {
-                permissionsToRemove.add(permission);
-            }
-        }
-
-        // Remove collected permissions
-        role.getUserPermissions().removeAll(permissionsToRemove);
-
-        // Save the updated role
-        return roleRepository.save(role);
-    }
-
-    @Override
-    public Role getRoleByName(String roleName) {
-        return roleRepository.findByRoleName(roleName).orElseThrow(() -> new NoSuchElementException(roleName +" is not found with role name"));
-    }
+    //---
 }
