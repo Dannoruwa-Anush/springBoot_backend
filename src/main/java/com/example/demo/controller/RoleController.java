@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.common.customHttpResponse.CustomErrorResponse;
 import com.example.demo.dto.request.RoleRequestDTO;
 import com.example.demo.dto.response.RoleDTO;
 import com.example.demo.dto.response.RoleResponseDTO;
@@ -51,9 +52,28 @@ public class RoleController {
         return responseDto;
     } 
 
+    /*
+     * ResponseEntity is a powerful class in Spring Boot for managing HTTP
+     * responses.
+     * 
+     * It allows you to:
+     * 
+     * Return custom status codes.
+     * Add headers.
+     * Set the body of the response.
+     * 
+     * .build() - You typically use .build() when you want to send an HTTP status
+     * without any associated content in the response body.
+     */
+
     @GetMapping
     public ResponseEntity<List<RoleDTO>> getAllRoles() {
         List<Role> roles = roleService.getAllRoles();
+
+        if(roles.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+
         List<RoleDTO> roleDTOs = roles.stream().map(this::toDTO).collect(Collectors.toList());
         return ResponseEntity.status(HttpStatus.OK).body(roleDTOs);
     }
@@ -65,40 +85,50 @@ public class RoleController {
             return ResponseEntity.status(HttpStatus.OK).body(toDTO(role));
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }catch(Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
     @PostMapping
-    public ResponseEntity<RoleDTO> createRole(@RequestBody RoleDTO roleDTO) {
+    public ResponseEntity<Object> createRole(@RequestBody RoleDTO roleDTO) {
         try {
             Role role = toEntity(roleDTO);
             Role createdRole = roleService.saveRole(role);
             return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(createdRole));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<RoleDTO> updateRole(@PathVariable long id, @RequestBody RoleDTO roleDTO) {
+    public ResponseEntity<Object> updateRole(@PathVariable long id, @RequestBody RoleDTO roleDTO) {
         try {
             Role role = toEntity(roleDTO);
             Role updatedRole = roleService.updateRole(id, role);
             return ResponseEntity.status(HttpStatus.OK).body(toDTO(updatedRole));
+        }catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
         } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Role is not found");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRole(@PathVariable long id) {
+    public ResponseEntity<Object> deleteRole(@PathVariable long id) {
         try {
             roleService.deleteRole(id);
             return ResponseEntity.status(HttpStatus.OK).build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
+        }catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Role is not found");
+        }catch(Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
         }
     }
 

@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.demo.common.customHttpResponse.CustomErrorResponse;
 import com.example.demo.dto.request.UserStaffRegistrationDTO;
 import com.example.demo.dto.response.UserDTO;
 import com.example.demo.entity.User;
@@ -34,10 +35,29 @@ public class UserController {
     }
     // ---
 
+        /*
+     * ResponseEntity is a powerful class in Spring Boot for managing HTTP
+     * responses.
+     * 
+     * It allows you to:
+     * 
+     * Return custom status codes.
+     * Add headers.
+     * Set the body of the response.
+     * 
+     * .build() - You typically use .build() when you want to send an HTTP status
+     * without any associated content in the response body.
+     */
+
     // Get all users
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<User> users = userService.getAllUsers();
+
+        if(users.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+
         List<UserDTO> userResponseDTOs = users.stream().map(this::toDTO).collect(Collectors.toList());
         return ResponseEntity.status(HttpStatus.OK).body(userResponseDTOs);
     }
@@ -51,20 +71,24 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.OK).body(toDTO(user));
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }catch(Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
     // ---
 
     // Update user profile by ID
     @PutMapping("/{id}")
-    public ResponseEntity<UserDTO> updateUserProfile(@PathVariable long id, @RequestBody UserDTO userDTO) {
+    public ResponseEntity<Object> updateUserProfile(@PathVariable long id, @RequestBody UserDTO userDTO) {
         try {
             User updatedUser = userService.updateUserProfile(id, userDTO);
             return ResponseEntity.status(HttpStatus.OK).body(toDTO(updatedUser));
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }  catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
+        }catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User is not found");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
         }
     }
     // ---

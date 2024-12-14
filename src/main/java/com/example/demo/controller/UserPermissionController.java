@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.common.customHttpResponse.CustomErrorResponse;
 import com.example.demo.dto.response.UserPermissionDTO;
 import com.example.demo.entity.UserPermission;
 import com.example.demo.service.UserPermissionService;
@@ -28,6 +29,20 @@ public class UserPermissionController {
     @Autowired
     private UserPermissionService userPermissionService;
 
+    /*
+     * ResponseEntity is a powerful class in Spring Boot for managing HTTP
+     * responses.
+     * 
+     * It allows you to:
+     * 
+     * Return custom status codes.
+     * Add headers.
+     * Set the body of the response.
+     * 
+     * .build() - You typically use .build() when you want to send an HTTP status
+     * without any associated content in the response body.
+     */
+    
     private UserPermissionDTO toDTO(UserPermission userPermission){
         UserPermissionDTO dto = new UserPermissionDTO();
         dto.setId(userPermission.getId());
@@ -45,6 +60,11 @@ public class UserPermissionController {
     @GetMapping
     public ResponseEntity<List<UserPermissionDTO>> getAllUserPermission() {
         List<UserPermission> userPermissions = userPermissionService.getAllUserPermissions();
+
+        if(userPermissions.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+
         List<UserPermissionDTO> userPermissionDTOs = userPermissions.stream().map(this::toDTO).collect(Collectors.toList());
         return ResponseEntity.status(HttpStatus.OK).body(userPermissionDTOs);
     }
@@ -54,42 +74,50 @@ public class UserPermissionController {
         try {
             UserPermission userPermission = userPermissionService.getUserPermissionById(id);
             return ResponseEntity.status(HttpStatus.OK).body(toDTO(userPermission));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
     @PostMapping
-    public ResponseEntity<UserPermissionDTO> createUserPermission(@RequestBody UserPermissionDTO userPermissionDTO) {
+    public ResponseEntity<Object> createUserPermission(@RequestBody UserPermissionDTO userPermissionDTO) {
         try {
             UserPermission createdUserPermission = userPermissionService.saveUserPermission(toEntity(userPermissionDTO));
             return ResponseEntity.status(HttpStatus.OK).body(toDTO(createdUserPermission));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
         }
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<UserPermissionDTO> updateUserPermission(@PathVariable Long id, @RequestBody UserPermissionDTO userPermissionDTO) {
+    public ResponseEntity<Object> updateUserPermission(@PathVariable Long id, @RequestBody UserPermissionDTO userPermissionDTO) {
         try {
             UserPermission updatedUserPermission = userPermissionService.updateUserPermission(id, toEntity(userPermissionDTO));
             return ResponseEntity.status(HttpStatus.OK).body(toDTO(updatedUserPermission));
+        }catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
         }catch(NoSuchElementException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Permission is not found");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUserPermission(@PathVariable Long id){
+    public ResponseEntity<Object> deleteUserPermission(@PathVariable Long id){
         try {
             userPermissionService.deleteRole(id);
-            return ResponseEntity.status(HttpStatus.OK).build();
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
         }catch(NoSuchElementException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Permission is not found");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
         }
     }
 }
