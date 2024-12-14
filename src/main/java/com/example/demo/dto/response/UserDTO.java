@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data // generate Getters and Setters using Lombok
 public class UserDTO {
-
+    //DTO specifies exactly what fields should be serialized.
     private Long id;
     private String username;
     private String email;
