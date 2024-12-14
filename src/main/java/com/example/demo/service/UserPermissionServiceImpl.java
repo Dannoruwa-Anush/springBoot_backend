@@ -24,8 +24,7 @@ public class UserPermissionServiceImpl implements UserPermissionService {
     private static final Logger logger = LoggerFactory.getLogger(UserPermissionServiceImpl.class);
 
     // ********
-    @Override
-    public UserPermissionResponseDTO toUserPermissionResponseDTO(UserPermission userPermission) {
+    private UserPermissionResponseDTO toUserPermissionResponseDTO(UserPermission userPermission) {
         UserPermissionResponseDTO dto = new UserPermissionResponseDTO();
         dto.setId(userPermission.getId());
         dto.setUserPermissionName(userPermission.getUserPermissionName());
@@ -33,8 +32,7 @@ public class UserPermissionServiceImpl implements UserPermissionService {
     }
     //---
 
-    @Override
-    public UserPermission toUserPermissionEntity(UserPermissionRequestDTO dto) {
+    private UserPermission toUserPermissionEntity(UserPermissionRequestDTO dto) {
         UserPermission userPermission = new UserPermission();
         userPermission.setUserPermissionName(dto.getUserPermissionName());
         return userPermission;

@@ -28,24 +28,19 @@ public class RoleServiceImpl implements RoleService {
     @Autowired
     private UserPermissionRepository userPermissionRepository;
 
-    @Autowired
-    private UserPermissionService userPermissionService; // to use DTO Convertor
-
     private static final Logger logger = LoggerFactory.getLogger(RoleServiceImpl.class);
 
     // ****
-    @Override
-    public RoleResponseDTO toRoleResponseDTO(Role role) {
+    private RoleResponseDTO toRoleResponseDTO(Role role) {
         RoleResponseDTO responseDto = new RoleResponseDTO();
         responseDto.setId(role.getId());
         responseDto.setRoleName(role.getRoleName());
 
         // Convert UserPermissions to DTOs
         // Convert UserPermissions to a set of names
-        Set<String> userPermissionNames = role.getUserPermissions().stream()
-                .map(userPermission -> userPermissionService.toUserPermissionResponseDTO(userPermission)
-                        .getUserPermissionName())
-                .collect(Collectors.toSet());
+        Set<String> userPermissionNames = role.getUserPermissions().stream() // Convert to stream
+                .map(UserPermission::getUserPermissionName) // Extract userPermissionName directly
+                .collect(Collectors.toSet()); // Collect names into a Set
 
         responseDto.setUserPermissionNames(userPermissionNames);
 
@@ -53,8 +48,7 @@ public class RoleServiceImpl implements RoleService {
     }
     // ---
 
-    @Override
-    public Role toRoleEntity(RoleRequestDTO dto) {
+    private Role toRoleEntity(RoleRequestDTO dto) {
         Role role = new Role();
         role.setRoleName(dto.getRoleName());
 
