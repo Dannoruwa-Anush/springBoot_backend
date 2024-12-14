@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.request.RoleRequestDTO;
 import com.example.demo.dto.response.RoleResponseDTO;
-import com.example.demo.dto.response.UserPermissionResponseDTO;
 import com.example.demo.entity.Role;
 import com.example.demo.entity.UserPermission;
 import com.example.demo.repository.RoleRepository;
@@ -42,15 +41,17 @@ public class RoleServiceImpl implements RoleService {
         responseDto.setRoleName(role.getRoleName());
 
         // Convert UserPermissions to DTOs
-        Set<UserPermissionResponseDTO> userPermissionDTOs = role.getUserPermissions().stream()
-                .map(userPermissionService::toUserPermissionResponseDTO)
+        // Convert UserPermissions to a set of names
+        Set<String> userPermissionNames = role.getUserPermissions().stream()
+                .map(userPermission -> userPermissionService.toUserPermissionResponseDTO(userPermission)
+                        .getUserPermissionName())
                 .collect(Collectors.toSet());
 
-        responseDto.setUserPermissions(userPermissionDTOs);
+        responseDto.setUserPermissionNames(userPermissionNames);
 
         return responseDto;
     }
-    //---
+    // ---
 
     @Override
     public Role toRoleEntity(RoleRequestDTO dto) {
@@ -75,7 +76,7 @@ public class RoleServiceImpl implements RoleService {
                 .collect(Collectors.toList());
         return roleDTOs;
     }
-    //---
+    // ---
 
     @Override
     public RoleResponseDTO getRoleById(long id) {
@@ -83,7 +84,7 @@ public class RoleServiceImpl implements RoleService {
                 .orElseThrow(() -> new NoSuchElementException("Role is not found " + id));
         return toRoleResponseDTO(role);
     }
-    //---
+    // ---
 
     @Override
     public RoleResponseDTO saveRole(RoleRequestDTO roleRequestDTO) {
@@ -96,7 +97,7 @@ public class RoleServiceImpl implements RoleService {
         Role saveToRole = toRoleEntity(roleRequestDTO);
         return toRoleResponseDTO(roleRepository.save(saveToRole));
     }
-    //---
+    // ---
 
     @Override
     public RoleResponseDTO updateRole(long id, RoleRequestDTO roleRequestDTO) {
@@ -134,7 +135,7 @@ public class RoleServiceImpl implements RoleService {
         // Convert to DTO and return
         return toRoleResponseDTO(updatedRole);
     }
-    //---
+    // ---
 
     @Override
     public void deleteRole(long id) {
@@ -145,5 +146,5 @@ public class RoleServiceImpl implements RoleService {
         roleRepository.deleteById(id);
         logger.info("Role with id {} was deleted.", id);
     }
-    //---
+    // ---
 }

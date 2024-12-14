@@ -8,5 +8,5 @@ import lombok.Data;
 public class RoleResponseDTO {
     private Long roleId;
     private String roleName;
-    private Set<UserPermissionResponseDTO> userPermissions;   
+    private Set<String> userPermissionNames;   
 }
