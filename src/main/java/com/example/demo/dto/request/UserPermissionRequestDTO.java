@@ -1,5 +1,6 @@
-package com.example.demo.dto.response;
+package com.example.demo.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,8 +8,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data //generate Getters and Setters using Lombok
-public class UserPermissionDTO {
+public class UserPermissionRequestDTO {
     
-    private Long id;
+    @NotBlank(message = "Permission name cannot be empty") //validation
     private String userPermissionName;
 }
