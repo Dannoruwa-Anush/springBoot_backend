@@ -5,24 +5,24 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.request.BookRequestDTO;
-import com.example.demo.entity.Book;
+import com.example.demo.dto.response.BookResponseDTO;
 
 @Service
 public interface BookService {
 
-    List<Book> getAllBooks();
+    List<BookResponseDTO> getAllBooks();
 
-    Book getBookById(long id);
+    BookResponseDTO getBookById(long id);
 
-    Book saveBook(BookRequestDTO bookSaveRequestDTO);
+    BookResponseDTO saveBook(BookRequestDTO bookSaveRequestDTO);
 
-    Book updateBook(long id, BookRequestDTO bookSaveRequestDTO);
+    BookResponseDTO updateBook(long id, BookRequestDTO bookSaveRequestDTO);
 
     void deleteBook(long id);
 
-    List<Book> getAllBooksBySubCategoryId(Long inputSubCategoryId);
+    List<BookResponseDTO> getAllBooksBySubCategoryId(Long inputSubCategoryId);
 
-    List<Book> getAllBooksByAuthorId(Long inputAuthorId);
+    List<BookResponseDTO> getAllBooksByAuthorId(Long inputAuthorId);
 
-    List<Book> getAllBooksByCategoryId(Long inputCategoryId);
+    List<BookResponseDTO> getAllBooksByCategoryId(Long inputCategoryId);
 }
