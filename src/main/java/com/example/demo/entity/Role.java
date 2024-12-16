@@ -12,6 +12,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -101,5 +103,13 @@ public class Role {
             return false;
         Role role = (Role) obj;
         return Objects.equals(id, role.id);
+    }
+
+    @PrePersist // is called before the entity is inserted
+    @PreUpdate // is called before the entity is updated
+    private void toUpperCase() {
+        if (roleName != null) {
+            roleName = roleName.toUpperCase(); //role name will be saved in capital letters
+        }
     }
 }
