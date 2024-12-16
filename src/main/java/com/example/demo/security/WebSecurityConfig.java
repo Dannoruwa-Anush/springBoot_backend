@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.example.demo.common.projectEnum.RoleName;
 import com.example.demo.security.jwt.AuthEntryPointJwt;
 
 import static org.springframework.security.config.Customizer.withDefaults;
@@ -125,6 +126,9 @@ public class WebSecurityConfig {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+
+                        .requestMatchers(HttpMethod.GET, "/user/**").hasRole(RoleName.ADMIN.getRoleName())
+
                         // Allow unauthenticated GET requests to /book/**
                         .requestMatchers(HttpMethod.GET, "/book/**").permitAll()
 
