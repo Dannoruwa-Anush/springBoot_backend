@@ -108,15 +108,15 @@ public class BookServiceImpl implements BookService {
             String coverImagePath = fileUploadConfig.saveFile(bookSaveRequestDTO.getCoverImage());
 
             // create a new book
-            Book book = new Book();
-            book.setTitle(bookSaveRequestDTO.getTitle());
-            book.setUnitPrice(bookSaveRequestDTO.getUnitPrice());
-            book.setQoh(bookSaveRequestDTO.getQoh());
-            book.setCoverImage(coverImagePath);
-            book.setAuthor(relatedAuthor);
-            book.setSubCategory(relatedSubCategory);
+            Book bookToSave = new Book();
+            bookToSave.setTitle(bookSaveRequestDTO.getTitle());
+            bookToSave.setUnitPrice(bookSaveRequestDTO.getUnitPrice());
+            bookToSave.setQoh(bookSaveRequestDTO.getQoh());
+            bookToSave.setCoverImage(coverImagePath);
+            bookToSave.setAuthor(relatedAuthor);
+            bookToSave.setSubCategory(relatedSubCategory);
 
-            return toBookResponseDTO(bookRepository.save(book));
+            return toBookResponseDTO(bookRepository.save(bookToSave));
 
         } catch (IOException e) {
             throw new IllegalArgumentException("Error uploading file: " + e.getMessage());

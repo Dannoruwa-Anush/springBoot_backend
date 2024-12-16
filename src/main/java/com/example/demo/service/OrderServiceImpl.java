@@ -200,20 +200,20 @@ public class OrderServiceImpl implements OrderService {
                 .sum();
 
         // Create and save order
-        Order order = new Order();
-        order.setTotalAmount(totalAmount);
+        Order orderToSave = new Order();
+        orderToSave.setTotalAmount(totalAmount);
 
         // set status to PENDING, when creating a new order
-        order.setStatus(OrderStatus.PENDING);
-        order.setOrderBooks(orderBooks);
-        order.setUser(customer);
+        orderToSave.setStatus(OrderStatus.PENDING);
+        orderToSave.setOrderBooks(orderBooks);
+        orderToSave.setUser(customer);
 
         // Persist order and associated orderBooks
         for (OrderBook orderBook : orderBooks) {
-            orderBook.setOrder(order); // Set back-reference to the order
+            orderBook.setOrder(orderToSave); // Set back-reference to the order
         }
 
-        return toOrderResponseDTO(orderRepository.save(order));
+        return toOrderResponseDTO(orderRepository.save(orderToSave));
     }
     // ---
 

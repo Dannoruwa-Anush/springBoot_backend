@@ -77,11 +77,11 @@ public class SubCategoryServiceImpl implements SubCategoryService {
                         "Category is not found with id: " + subCategorySaveRequestDTO.getCategoryId()));
 
         // create a new subCategory
-        SubCategory subCategory = new SubCategory();
-        subCategory.setSubCategoryName(subCategorySaveRequestDTO.getSubCategoryName());
-        subCategory.setCategory(relatedCategory);
+        SubCategory subCategoryToSave = new SubCategory();
+        subCategoryToSave.setSubCategoryName(subCategorySaveRequestDTO.getSubCategoryName());
+        subCategoryToSave.setCategory(relatedCategory);
 
-        return toSubCategoryResponseDTO(subCategoryRepository.save(subCategory));
+        return toSubCategoryResponseDTO(subCategoryRepository.save(subCategoryToSave));
     }
     // ---
 

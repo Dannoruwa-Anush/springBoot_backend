@@ -145,16 +145,16 @@ public class UserServiceImpl implements UserService {
                "The email '" + userStaffRegistrationDTO.getEmail() + "' is already in use.");
       }
 
-      User staffUser = new User();
-      staffUser.setUsername(userStaffRegistrationDTO.getUsername());
-      staffUser.setEmail(userStaffRegistrationDTO.getEmail());
+      User newStaffUserToSave = new User();
+      newStaffUserToSave.setUsername(userStaffRegistrationDTO.getUsername());
+      newStaffUserToSave.setEmail(userStaffRegistrationDTO.getEmail());
 
       // Temporary password is assigned
       String tempPassword = "staff";
-      staffUser.setPassword(passwordEncoder.encode(tempPassword)); // Encode temporary password before setting
+      newStaffUserToSave.setPassword(passwordEncoder.encode(tempPassword)); // Encode temporary password before setting
 
-      staffUser.setAddress(userStaffRegistrationDTO.getAddress());
-      staffUser.setTelephoneNumber(userStaffRegistrationDTO.getTelephoneNumber());
+      newStaffUserToSave.setAddress(userStaffRegistrationDTO.getAddress());
+      newStaffUserToSave.setTelephoneNumber(userStaffRegistrationDTO.getTelephoneNumber());
 
       // Assign requested roles for new staff member
       Set<Role> roles = new HashSet<>();
@@ -171,11 +171,11 @@ public class UserServiceImpl implements UserService {
          roles.add(role);
       }
 
-      staffUser.setRoles(roles);
+      newStaffUserToSave.setRoles(roles);
 
-      userRepository.save(staffUser);
+      userRepository.save(newStaffUserToSave);
 
-      return toUserResponseDTO(staffUser);
+      return toUserResponseDTO(newStaffUserToSave);
    }
    // ---
 
@@ -205,25 +205,25 @@ public class UserServiceImpl implements UserService {
             .collect(Collectors.toSet());
 
       // Create a new user object
-      User newCustomer = new User();
-      newCustomer.setUsername(customerRegistrationDTO.getUsername());
-      newCustomer.setEmail(customerRegistrationDTO.getEmail());
-      newCustomer.setPassword(passwordEncoder.encode(customerRegistrationDTO.getPassword())); // Encode password before
+      User newCustomerToSave = new User();
+      newCustomerToSave.setUsername(customerRegistrationDTO.getUsername());
+      newCustomerToSave.setEmail(customerRegistrationDTO.getEmail());
+      newCustomerToSave.setPassword(passwordEncoder.encode(customerRegistrationDTO.getPassword())); // Encode password before
                                                                                               // setting
-      newCustomer.setAddress(customerRegistrationDTO.getAddress());
-      newCustomer.setTelephoneNumber(customerRegistrationDTO.getTelephoneNumber());
-      newCustomer.setRoles(roles);
+      newCustomerToSave.setAddress(customerRegistrationDTO.getAddress());
+      newCustomerToSave.setTelephoneNumber(customerRegistrationDTO.getTelephoneNumber());
+      newCustomerToSave.setRoles(roles);
 
       /*
        * Customer can create their own password,
        * no need to reset it at the first login
        */
-      newCustomer.setFirstLogin(false);
+      newCustomerToSave.setFirstLogin(false);
 
       // Save the new customer user
-      userRepository.save(newCustomer);
+      userRepository.save(newCustomerToSave);
 
-      return toUserResponseDTO(newCustomer);
+      return toUserResponseDTO(newCustomerToSave);
    }
    // ---
 

@@ -32,12 +32,6 @@ public class CategoryServiceImpl implements CategoryService {
         return dto;
     }
     // ---
-
-    private Category toCategoryEntity(CategoryRequestDTO dto) {
-        Category category = new Category();
-        category.setCategoryName(dto.getCategoryName());
-        return category;
-    }
     // ********
 
     @Override
@@ -68,9 +62,10 @@ public class CategoryServiceImpl implements CategoryService {
                     "Category with name " + categoryRequestDTO.getCategoryName() + " already exists");
         }
 
-        // convert dto to entity before save
-        Category categoryToSave = toCategoryEntity(categoryRequestDTO);
-        return toCategoryResponseDTO(categoryRepository.save(categoryToSave));
+        //create new category
+        Category saveTocategory = new Category();
+        saveTocategory.setCategoryName(categoryRequestDTO.getCategoryName());
+        return toCategoryResponseDTO(categoryRepository.save(saveTocategory));
     }
     // ---
 

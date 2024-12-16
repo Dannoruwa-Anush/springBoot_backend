@@ -61,9 +61,9 @@ public class AuthorServiceImpl implements AuthorService {
         }
 
         // create a new author
-        Author author = new Author();
-        author.setAuthorName(authorRequestDTO.getAuthorName());
-        return toAuthorResponseDTO(authorRepository.save(author));
+        Author authorToSave = new Author();
+        authorToSave.setAuthorName(authorRequestDTO.getAuthorName());
+        return toAuthorResponseDTO(authorRepository.save(authorToSave));
     }
     // ---
 

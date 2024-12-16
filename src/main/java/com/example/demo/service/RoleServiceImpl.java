@@ -46,20 +46,6 @@ public class RoleServiceImpl implements RoleService {
         return responseDto;
     }
     // ---
-
-    private Role toRoleEntity(RoleRequestDTO dto) {
-        Role role = new Role();
-        role.setRoleName(dto.getRoleName());
-
-        // Fetch and set permissions
-        List<UserPermission> requestPermissionList = userPermissionRepository.findAllById(dto.getPermissionIds());
-
-        // Use a temporary set to safely handle permissions
-        Set<UserPermission> requestPermissionSet = new HashSet<>(requestPermissionList);
-        role.setUserPermissions(requestPermissionSet);
-
-        return role;
-    }
     // ****
 
     @Override
@@ -86,8 +72,17 @@ public class RoleServiceImpl implements RoleService {
             throw new IllegalArgumentException("Role with name '" + roleRequestDTO.getRoleName() + "' already exists.");
         }
 
-        // convert dto to entity
-        Role saveToRole = toRoleEntity(roleRequestDTO);
+        //Create a new role
+        Role saveToRole = new Role();
+        saveToRole.setRoleName(roleRequestDTO.getRoleName());
+
+        // Fetch and set permissions
+        List<UserPermission> requestPermissionList = userPermissionRepository.findAllById(roleRequestDTO.getPermissionIds());
+
+        // Use a temporary set to safely handle permissions
+        Set<UserPermission> requestPermissionSet = new HashSet<>(requestPermissionList);
+        saveToRole.setUserPermissions(requestPermissionSet);
+
         return toRoleResponseDTO(roleRepository.save(saveToRole));
     }
     // ---

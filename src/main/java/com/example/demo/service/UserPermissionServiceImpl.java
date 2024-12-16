@@ -31,12 +31,6 @@ public class UserPermissionServiceImpl implements UserPermissionService {
         return dto;
     }
     //---
-
-    private UserPermission toUserPermissionEntity(UserPermissionRequestDTO dto) {
-        UserPermission userPermission = new UserPermission();
-        userPermission.setUserPermissionName(dto.getUserPermissionName());
-        return userPermission;
-    }
     // ********
 
     @Override
@@ -66,8 +60,9 @@ public class UserPermissionServiceImpl implements UserPermissionService {
                     "Permission with name" + userPermissionRequestDTO.getUserPermissionName() + " already exists");
         }
 
-        // convert dto to entity before save
-        UserPermission saveToUserPermission = toUserPermissionEntity(userPermissionRequestDTO);
+        //create new userPermission
+        UserPermission saveToUserPermission = new UserPermission();
+        saveToUserPermission.setUserPermissionName(userPermissionRequestDTO.getUserPermissionName());
 
         return toUserPermissionResponseDTO(userPermissionRepository.save(saveToUserPermission));
     }
