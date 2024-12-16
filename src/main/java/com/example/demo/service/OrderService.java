@@ -1,28 +1,31 @@
 package com.example.demo.service;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.example.demo.common.projectEnum.OrderStatus;
-import com.example.demo.dto.request.OrderBookRequestDTO;
+import com.example.demo.dto.request.OrderByDateRequestDTO;
+import com.example.demo.dto.request.OrderByStatusRequestDTO;
 import com.example.demo.dto.request.OrderRequestDTO;
-import com.example.demo.entity.Order;
+import com.example.demo.dto.request.OrderStatusUpdateRequestDTO;
+import com.example.demo.dto.request.ShoppingCartTotalRequestDTO;
+import com.example.demo.dto.response.OrderBillResponseDTO;
+import com.example.demo.dto.response.OrderResponseDTO;
+import com.example.demo.dto.response.ShoppingCartTotalResponseDTO;
 
 @Service
 public interface OrderService {
-    List<Order> getAllOrders();
-    Order getOrderById(long id);
-    Order saveOrder(OrderRequestDTO orderRequestDTO);
-    Order updateOrder(long id, OrderRequestDTO orderRequestDTO);
+    List<OrderResponseDTO> getAllOrders();
+    OrderBillResponseDTO getOrderById(long id);
+    OrderResponseDTO saveOrder(OrderRequestDTO orderRequestDTO);
+    OrderResponseDTO updateOrder(long id, OrderRequestDTO orderRequestDTO);
     void deleteOrder(long id);  
 
-    List<Order> getAllOrdersByUserId(Long inputUserId);
-    List<Order> getAllOrdersByOrderStatus(OrderStatus inputOrderStatus);
-    List<Order> findAllOrdersByDateAndStatus(LocalDate inputOrderPlacedDate, OrderStatus inputOrderStatus);
+    List<OrderResponseDTO> getAllOrdersByUserId(long inputUserId);
+    List<OrderResponseDTO> getAllOrdersByOrderStatus(OrderByStatusRequestDTO orderByStatusRequestDTO);
+    List<OrderResponseDTO> findAllOrdersByDateAndStatus(OrderByDateRequestDTO orderByDateRequestDTO);
 
-    Order updateOrderStatus(long id, OrderStatus newStatus);
+    OrderResponseDTO updateOrderStatus(long id, OrderStatusUpdateRequestDTO orderStatusUpdateRequestDTO);
 
-    double calculateTotalAmount(List<OrderBookRequestDTO> booksDTOs);
+    ShoppingCartTotalResponseDTO calculateTotalAmount(ShoppingCartTotalRequestDTO ShoppingCartTotalRequestDTO);
 }

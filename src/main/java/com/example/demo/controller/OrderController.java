@@ -18,9 +18,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.common.customHttpResponse.CustomErrorResponse;
 import com.example.demo.dto.request.OrderRequestDTO;
 import com.example.demo.dto.request.OrderStatusUpdateRequestDTO;
+import com.example.demo.dto.request.ShoppingCartTotalRequestDTO;
+import com.example.demo.dto.response.OrderBillResponseDTO;
+import com.example.demo.dto.response.OrderResponseDTO;
+import com.example.demo.dto.response.ShoppingCartTotalResponseDTO;
 import com.example.demo.dto.request.OrderByDateRequestDTO;
 import com.example.demo.dto.request.OrderByStatusRequestDTO;
-import com.example.demo.entity.Order;
 import com.example.demo.service.OrderService;
 
 @RestController
@@ -45,8 +48,8 @@ public class OrderController {
      */
 
     @GetMapping
-    public ResponseEntity<List<Order>> getAllOrders() {
-        List<Order> orders = orderService.getAllOrders();
+    public ResponseEntity<List<OrderResponseDTO>> getAllOrders() {
+        List<OrderResponseDTO> orders = orderService.getAllOrders();
 
         if (orders.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -57,9 +60,9 @@ public class OrderController {
     // ---
 
     @GetMapping("/{id}")
-    public ResponseEntity<Order> getAllOrderById(@PathVariable Long id) {
+    public ResponseEntity<OrderBillResponseDTO> getAllOrderById(@PathVariable Long id) {
         try {
-            Order order = orderService.getOrderById(id);
+            OrderBillResponseDTO order = orderService.getOrderById(id);
             return ResponseEntity.status(HttpStatus.OK).body(order);
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
@@ -72,7 +75,7 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<Object> createOrder(@RequestBody OrderRequestDTO orderRequestDTO) {
         try {
-            Order savedOrder = orderService.saveOrder(orderRequestDTO);
+            OrderResponseDTO savedOrder = orderService.saveOrder(orderRequestDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedOrder);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
@@ -85,7 +88,7 @@ public class OrderController {
     @PutMapping("/{id}")
     public ResponseEntity<Object> updateOrder(@PathVariable Long id, @RequestBody OrderRequestDTO orderRequestDTO) {
         try {
-            Order updatedOrder = orderService.updateOrder(id, orderRequestDTO);
+            OrderResponseDTO updatedOrder = orderService.updateOrder(id, orderRequestDTO);
             return ResponseEntity.status(HttpStatus.OK).body(updatedOrder);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
@@ -96,7 +99,7 @@ public class OrderController {
     // ---
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteOrder(@PathVariable Long id) {
+    public ResponseEntity<Object> deleteOrder(@PathVariable long id) {
         try {
             orderService.deleteOrder(id);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -111,8 +114,8 @@ public class OrderController {
     // ---
 
     @GetMapping("/customer/{userId}")
-    public ResponseEntity<List<Order>> getAllOrdersByUserId(@PathVariable Long userId) {
-        List<Order> orders = orderService.getAllOrdersByUserId(userId);
+    public ResponseEntity<List<OrderResponseDTO>> getAllOrdersByUserId(@PathVariable Long userId) {
+        List<OrderResponseDTO> orders = orderService.getAllOrdersByUserId(userId);
 
         if (orders.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -123,8 +126,8 @@ public class OrderController {
     // ---
 
     @GetMapping("/orderStatus")
-    public ResponseEntity<List<Order>> getAllOrdersByOrderStatus(@RequestBody OrderByStatusRequestDTO checkedStatus) {
-        List<Order> orders = orderService.getAllOrdersByOrderStatus(checkedStatus.getCheckedStatus());
+    public ResponseEntity<List<OrderResponseDTO>> getAllOrdersByOrderStatus(@RequestBody OrderByStatusRequestDTO orderByStatusRequestDTO) {
+        List<OrderResponseDTO> orders = orderService.getAllOrdersByOrderStatus(orderByStatusRequestDTO);
 
         if (orders.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -135,8 +138,8 @@ public class OrderController {
     // ---
 
     @GetMapping("/orderDateAndStatus")
-    public ResponseEntity<List<Order>> findAllOrdersByDateAndStatus(@RequestBody OrderByDateRequestDTO orderByDateRequestDTO) {
-        List<Order> orders = orderService.findAllOrdersByDateAndStatus(orderByDateRequestDTO.getCheckedDate(), orderByDateRequestDTO.getCheckedStatus());
+    public ResponseEntity<List<OrderResponseDTO>> findAllOrdersByDateAndStatus(@RequestBody OrderByDateRequestDTO orderByDateRequestDTO) {
+        List<OrderResponseDTO> orders = orderService.findAllOrdersByDateAndStatus(orderByDateRequestDTO);
 
         if (orders.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -149,7 +152,7 @@ public class OrderController {
     @PutMapping("/updateOrderStatus/{id}")
     public ResponseEntity<Object> updateOrderStatus(@PathVariable long id, @RequestBody OrderStatusUpdateRequestDTO orderStatusUpdateRequestDTO) {
         try {
-            Order updatedOrder = orderService.updateOrderStatus(id, orderStatusUpdateRequestDTO.getNewStatus());
+            OrderResponseDTO updatedOrder = orderService.updateOrderStatus(id, orderStatusUpdateRequestDTO);
             return ResponseEntity.status(HttpStatus.OK).body(updatedOrder);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
@@ -158,4 +161,18 @@ public class OrderController {
         }
     }
     // ---
+
+
+    @PostMapping("/getShoppingCartTotal")
+    public ResponseEntity<Object> getShoppingCartTotal(@RequestBody ShoppingCartTotalRequestDTO ShoppingCartTotalRequestDTO) {
+        try {
+            ShoppingCartTotalResponseDTO calculatedTotal = orderService.calculateTotalAmount(ShoppingCartTotalRequestDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(calculatedTotal);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+    //---
 }

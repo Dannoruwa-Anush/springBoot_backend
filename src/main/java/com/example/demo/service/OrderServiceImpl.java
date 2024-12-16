@@ -1,9 +1,9 @@
 package com.example.demo.service;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +12,17 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.common.projectEnum.OrderStatus;
 import com.example.demo.dto.request.OrderBookRequestDTO;
+import com.example.demo.dto.request.OrderByDateRequestDTO;
+import com.example.demo.dto.request.OrderByStatusRequestDTO;
 import com.example.demo.dto.request.OrderRequestDTO;
+import com.example.demo.dto.request.OrderStatusUpdateRequestDTO;
+import com.example.demo.dto.request.ShoppingCartTotalRequestDTO;
+import com.example.demo.dto.response.BookResponseDTO;
+import com.example.demo.dto.response.CustomerUserResponseDTO;
+import com.example.demo.dto.response.OrderBillResponseDTO;
+import com.example.demo.dto.response.OrderBookResponseDTO;
+import com.example.demo.dto.response.OrderResponseDTO;
+import com.example.demo.dto.response.ShoppingCartTotalResponseDTO;
 import com.example.demo.entity.Book;
 import com.example.demo.entity.Order;
 import com.example.demo.entity.OrderBook;
@@ -37,7 +47,80 @@ public class OrderServiceImpl implements OrderService {
 
     private static final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
 
+    // **** (Entity -> DTO conversions)
+    private OrderResponseDTO toOrderResponseDTO(Order order) {
+        OrderResponseDTO dto = new OrderResponseDTO();
+        dto.setId(order.getId());
+        dto.setTotalAmount(order.getTotalAmount());
+        dto.setCreatedAt(order.getCreatedAt().toLocalDate());
+        dto.setStatus(order.getStatus());
+        dto.setCustomerName(order.getUser().getUsername());
+
+        return dto;
+    }
+    // ---
+
+    //---
+    private CustomerUserResponseDTO toCustomerUserResponseDTO(User user){
+        CustomerUserResponseDTO customer = new CustomerUserResponseDTO();
+        customer.setId(user.getId());
+        customer.setUsername(user.getUsername());
+        customer.setEmail(user.getEmail());
+        customer.setAddress(user.getAddress());
+        customer.setTelephoneNumber(user.getTelephoneNumber());
+        return customer;
+    }
+    //---
+
+    //---
+     private BookResponseDTO toBookResponseDTO(Book book) {
+        BookResponseDTO booDto = new BookResponseDTO();
+        booDto.setTitle(book.getTitle());
+        booDto.setUnitPrice(book.getUnitPrice());
+        return booDto;
+    }
+    //---
+
+    //---
+    private List<OrderBookResponseDTO> toListOrderBookResponseDTO (List<OrderBook> orderBooks){
+        List<OrderBookResponseDTO> listDTOs = new ArrayList<>();
+
+        for (OrderBook orderBook : orderBooks) {
+            OrderBookResponseDTO dto = new OrderBookResponseDTO();
+            dto.setQuantity(orderBook.getQuantity());
+            dto.setBook(toBookResponseDTO(orderBook.getBook()));
+
+            listDTOs.add(dto);
+        }
+    
+        return listDTOs;
+    }
+    //---
+
+    // ---
+    private OrderBillResponseDTO toOrderBillResponseDTO(Order order) {
+        OrderBillResponseDTO billDTO = new OrderBillResponseDTO();
+        billDTO.setId(order.getId());
+        billDTO.setTotalAmount(order.getTotalAmount());
+        billDTO.setCreatedAt(order.getCreatedAt().toLocalDate());
+        billDTO.setStatus(order.getStatus());
+        billDTO.setCustomer(toCustomerUserResponseDTO(order.getUser()));
+        billDTO.setOrderBooks(toListOrderBookResponseDTO(order.getOrderBooks()));
+
+        return billDTO;
+    }
+    // ---
+
+    private ShoppingCartTotalResponseDTO toShoppingCartTotalResponseDTO(double totalAmount) {
+
+        ShoppingCartTotalResponseDTO cartDTO = new ShoppingCartTotalResponseDTO();
+        cartDTO.setTotalAmount(totalAmount);
+
+        return cartDTO;
+    }
     // ****
+
+    // *****
     // Helper method to get all books and create OrderBook
     private List<OrderBook> prepareOrderBooks(List<OrderBookRequestDTO> booksDTOs) {
         List<OrderBook> orderBooks = new ArrayList<>();
@@ -67,15 +150,19 @@ public class OrderServiceImpl implements OrderService {
     // ****
 
     @Override
-    public List<Order> getAllOrders() {
-        return orderRepository.findAll();
+    public List<OrderResponseDTO> getAllOrders() {
+        List<Order> orders = orderRepository.findAll();
+        List<OrderResponseDTO> orderDTOs = orders.stream().map(this::toOrderResponseDTO).collect(Collectors.toList());
+        return orderDTOs;
     }
     // ---
 
     @Override
-    public Order getOrderById(long id) {
-        return orderRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Order is not found with id: " + id));
+    public OrderBillResponseDTO getOrderById(long id) {
+        Order order = orderRepository.findById(id)
+            .orElseThrow(() -> new NoSuchElementException("Order is not found with id: " + id));
+
+        return toOrderBillResponseDTO(order);
     }
     // ---
 
@@ -92,7 +179,7 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     @Transactional
-    public Order saveOrder(OrderRequestDTO orderRequestDTO) {
+    public OrderResponseDTO saveOrder(OrderRequestDTO orderRequestDTO) {
 
         // Fetch customer details
         User customer = userRepository.findById(orderRequestDTO.getCustomerId())
@@ -121,7 +208,7 @@ public class OrderServiceImpl implements OrderService {
             orderBook.setOrder(order); // Set back-reference to the order
         }
 
-        return orderRepository.save(order);
+        return toOrderResponseDTO(orderRepository.save(order));
     }
     // ---
 
@@ -138,7 +225,7 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     @Transactional
-    public Order updateOrder(long id, OrderRequestDTO orderRequestDTO) {
+    public OrderResponseDTO updateOrder(long id, OrderRequestDTO orderRequestDTO) {
         // Fetch existing order
         Order existingOrder = orderRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Order not found with ID: " + id));
@@ -179,7 +266,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         // Save and return the updated order
-        return orderRepository.save(existingOrder);
+        return toOrderResponseDTO(orderRepository.save(existingOrder));
     }
     // ---
 
@@ -195,45 +282,54 @@ public class OrderServiceImpl implements OrderService {
     // ---
 
     @Override
-    public List<Order> getAllOrdersByUserId(Long inputUserId) {
-        return orderRepository.findAllOrdersByUserId(inputUserId);
+    public List<OrderResponseDTO> getAllOrdersByUserId(long inputUserId) {
+        List<Order> orders = orderRepository.findAllOrdersByUserId(inputUserId);
+        List<OrderResponseDTO> orderDTOs = orders.stream().map(this::toOrderResponseDTO).collect(Collectors.toList());
+        return orderDTOs;
     }
     // ---
 
     @Override
-    public List<Order> getAllOrdersByOrderStatus(OrderStatus inputOrderStatus) {
-        return orderRepository.findAllOrdersByOrderStatus(inputOrderStatus);
+    public List<OrderResponseDTO> getAllOrdersByOrderStatus(OrderByStatusRequestDTO orderByStatusRequestDTO) {
+        List<Order> orders = orderRepository.findAllOrdersByOrderStatus(orderByStatusRequestDTO.getCheckedStatus());
+        List<OrderResponseDTO> orderDTOs = orders.stream().map(this::toOrderResponseDTO).collect(Collectors.toList());
+        return orderDTOs;
     }
     // ---
 
     @Override
-    public List<Order> findAllOrdersByDateAndStatus(LocalDate inputOrderPlacedDate, OrderStatus inputOrderStatus) {
-        return orderRepository.findAllOrdersByDateAndStatus(inputOrderPlacedDate, inputOrderStatus);
+    public List<OrderResponseDTO> findAllOrdersByDateAndStatus(OrderByDateRequestDTO orderByDateRequestDTO) {
+        List<Order> orders = orderRepository.findAllOrdersByDateAndStatus(orderByDateRequestDTO.getCheckedDate(),
+                orderByDateRequestDTO.getCheckedStatus());
+        List<OrderResponseDTO> orderDTOs = orders.stream().map(this::toOrderResponseDTO).collect(Collectors.toList());
+        return orderDTOs;
     }
     // ---
 
     @Override
-    public Order updateOrderStatus(long id, OrderStatus newStatus) {
+    public OrderResponseDTO updateOrderStatus(long id, OrderStatusUpdateRequestDTO orderStatusUpdateRequestDTO) {
 
-        if (newStatus == OrderStatus.PENDING) {
+        if (orderStatusUpdateRequestDTO.getNewStatus() == OrderStatus.PENDING) {
             // Status is set to PENDING automatically, when creationg or saving an order.
             throw new IllegalArgumentException("Cannot update the status to PENDING.");
         }
 
         // get the order details
-        Order existingOrder = getOrderById(id);
+        Order existingOrder = orderRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Order not found with ID: " + id));
 
         // Validate the current state and the new state
         if (existingOrder.getStatus() == OrderStatus.CANCELLED) {
             throw new IllegalArgumentException("Cannot update the status of a cancelled order.");
         }
 
-        if (existingOrder.getStatus() == OrderStatus.DELIVERED && newStatus != OrderStatus.DELIVERED) {
+        if (existingOrder.getStatus() == OrderStatus.DELIVERED
+                && orderStatusUpdateRequestDTO.getNewStatus() != OrderStatus.DELIVERED) {
             throw new IllegalArgumentException("Cannot change the status of a delivered order.");
         }
 
         // Restore stock if transitioning to `CANCELLED`
-        if (newStatus == OrderStatus.CANCELLED) {
+        if (orderStatusUpdateRequestDTO.getNewStatus() == OrderStatus.CANCELLED) {
             for (OrderBook orderBook : existingOrder.getOrderBooks()) {
                 Book book = orderBook.getBook();
                 book.setQoh(book.getQoh() + orderBook.getQuantity());
@@ -241,16 +337,16 @@ public class OrderServiceImpl implements OrderService {
         }
 
         // Update status and save the order
-        existingOrder.setStatus(newStatus);
-        return orderRepository.save(existingOrder);
+        existingOrder.setStatus(orderStatusUpdateRequestDTO.getNewStatus());
+        return toOrderResponseDTO(orderRepository.save(existingOrder));
     }
     // ----
 
     @Override
-    public double calculateTotalAmount(List<OrderBookRequestDTO> booksDTOs) {
+    public ShoppingCartTotalResponseDTO calculateTotalAmount(ShoppingCartTotalRequestDTO ShoppingCartTotalRequestDTO) {
         double totalAmount = 0;
 
-        for (OrderBookRequestDTO bookDTO : booksDTOs) {
+        for (OrderBookRequestDTO bookDTO : ShoppingCartTotalRequestDTO.getShoppingCartBooks()) {
             Book book = bookRepository.findById(bookDTO.getBookId())
                     .orElseThrow(() -> new IllegalArgumentException("Invalid book ID: " + bookDTO.getBookId()));
 
@@ -261,7 +357,7 @@ public class OrderServiceImpl implements OrderService {
             totalAmount += book.getUnitPrice() * bookDTO.getQuantity();
         }
 
-        return totalAmount;
+        return toShoppingCartTotalResponseDTO(totalAmount);
     }
     // ----
 }
