@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data // generate Getters and Setters using Lombok
 public class CategoryRequestDTO {
-     // DTO specifies exactly what fields should be serialized.
+    // DTO specifies exactly what fields should be serialized.
     private String categoryName;
 }

@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data //Generate Getter & Setters using Lombok 
 public class LoginRequestDTO {
-
+    // DTO specifies exactly what fields should be serialized.
     private String username;
     private String password;
 }

@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data //Generate Getter & Setters using Lombok 
 public class JwtResponseDTO {
+    // DTO specifies exactly what fields should be serialized.
     private String token;
     private Long userId;
     private String username;

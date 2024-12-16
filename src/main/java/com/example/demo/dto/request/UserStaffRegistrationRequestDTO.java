@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data // generate Getters and Setters using Lombok
 public class UserStaffRegistrationRequestDTO {
-    
+    // DTO specifies exactly what fields should be serialized.
     private String username;
     private String email;
     private String address;
