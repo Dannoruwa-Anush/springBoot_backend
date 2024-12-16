@@ -3,6 +3,7 @@ package com.example.demo.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -124,8 +125,16 @@ public class WebSecurityConfig {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll() // Allow unauthenticated access to /auth/*
-                        .anyRequest().authenticated());
+                        // Allow unauthenticated GET requests to /book
+                        .requestMatchers(HttpMethod.GET, "/book").permitAll()
+
+                        // Allow unauthenticated POST requests to /order/getShoppingCartTotal
+                        .requestMatchers(HttpMethod.POST, "/order/getShoppingCartTotal").permitAll()
+
+                        // Allow unauthenticated access to /auth
+                        .requestMatchers("/auth/**").permitAll()
+
+                        .anyRequest().authenticated()); // Authenticate all other requests
 
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
