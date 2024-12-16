@@ -11,5 +11,6 @@ public class OrderBookResponseDTO {
     // DTO specifies exactly what fields should be serialized.
 
     private int quantity; // Quantity of the book
-    private BookResponseDTO book;
+    private BookInOrderResponseDTO book;
+    private double subTotal = 0; //SubTotal of each book = quantity * unitPrice
 }

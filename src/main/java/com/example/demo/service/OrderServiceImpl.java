@@ -17,7 +17,7 @@ import com.example.demo.dto.request.OrderByStatusRequestDTO;
 import com.example.demo.dto.request.OrderRequestDTO;
 import com.example.demo.dto.request.OrderStatusUpdateRequestDTO;
 import com.example.demo.dto.request.ShoppingCartTotalRequestDTO;
-import com.example.demo.dto.response.BookResponseDTO;
+import com.example.demo.dto.response.BookInOrderResponseDTO;
 import com.example.demo.dto.response.CustomerUserResponseDTO;
 import com.example.demo.dto.response.OrderBillResponseDTO;
 import com.example.demo.dto.response.OrderBookResponseDTO;
@@ -73,11 +73,12 @@ public class OrderServiceImpl implements OrderService {
     //---
 
     //---
-     private BookResponseDTO toBookResponseDTO(Book book) {
-        BookResponseDTO booDto = new BookResponseDTO();
-        booDto.setTitle(book.getTitle());
-        booDto.setUnitPrice(book.getUnitPrice());
-        return booDto;
+     private BookInOrderResponseDTO toBookInOrderResponseDTO(Book book) {
+        BookInOrderResponseDTO bookDto = new BookInOrderResponseDTO();
+        bookDto.setId(book.getId());
+        bookDto.setTitle(book.getTitle());
+        bookDto.setUnitPrice(book.getUnitPrice());
+        return bookDto;
     }
     //---
 
@@ -88,8 +89,12 @@ public class OrderServiceImpl implements OrderService {
         for (OrderBook orderBook : orderBooks) {
             OrderBookResponseDTO dto = new OrderBookResponseDTO();
             dto.setQuantity(orderBook.getQuantity());
-            dto.setBook(toBookResponseDTO(orderBook.getBook()));
+            dto.setBook(toBookInOrderResponseDTO(orderBook.getBook()));
 
+            //calculate subTotal
+            double subTotal = orderBook.getQuantity() * orderBook.getBook().getUnitPrice();
+            dto.setSubTotal(subTotal);
+            
             listDTOs.add(dto);
         }
     
