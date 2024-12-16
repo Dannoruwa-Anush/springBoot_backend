@@ -125,13 +125,13 @@ public class WebSecurityConfig {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Allow unauthenticated GET requests to /book
-                        .requestMatchers(HttpMethod.GET, "/book").permitAll()
+                        // Allow unauthenticated GET requests to /book/**
+                        .requestMatchers(HttpMethod.GET, "/book/**").permitAll()
 
                         // Allow unauthenticated POST requests to /order/getShoppingCartTotal
                         .requestMatchers(HttpMethod.POST, "/order/getShoppingCartTotal").permitAll()
 
-                        // Allow unauthenticated access to /auth
+                        // Allow unauthenticated access to /auth/**
                         .requestMatchers("/auth/**").permitAll()
 
                         .anyRequest().authenticated()); // Authenticate all other requests
