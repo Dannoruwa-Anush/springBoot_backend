@@ -27,11 +27,16 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User user = userRepository.findByUsernameWithRolesAndPermissions(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        // Extract authorities
+        // Extract permissions as authorities
         Set<GrantedAuthority> authorities = user.getRoles().stream()
                 .flatMap(role -> role.getUserPermissions().stream())
                 .map(permission -> new SimpleGrantedAuthority(permission.getUserPermissionName()))
                 .collect(Collectors.toSet());
+        
+        // Extract roles as authorities (add "ROLE_" prefix for Spring Security compatibility)
+        authorities.addAll(user.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRoleName()))
+                .collect(Collectors.toSet()));        
 
         // Return UserDetails
         return org.springframework.security.core.userdetails.User.builder()
