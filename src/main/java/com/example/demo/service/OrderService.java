@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.common.projectEnum.OrderStatus;
+import com.example.demo.dto.request.OrderBookRequestDTO;
 import com.example.demo.dto.request.OrderRequestDTO;
 import com.example.demo.entity.Order;
 
@@ -22,4 +23,6 @@ public interface OrderService {
     List<Order> findAllOrdersByDateAndStatus(LocalDate inputOrderPlacedDate, OrderStatus inputOrderStatus);
 
     Order updateOrderStatus(long id, OrderStatus newStatus);
+
+    double calculateTotalAmount(List<OrderBookRequestDTO> booksDTOs);
 }

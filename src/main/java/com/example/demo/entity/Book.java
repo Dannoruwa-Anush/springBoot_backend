@@ -2,6 +2,7 @@ package com.example.demo.entity;
 
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -9,8 +10,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -69,9 +70,9 @@ public class Book {
     @JoinColumn(name = "author_id", nullable = false) // Foreign key column
     private Author author;
 
-    // Order (Many) --- (Many) Book
+    // OrderBooks (Many) --- (One) Book
     // Book side relationship
-    // books -> variable private List<Book> books; in Order.java
-    @ManyToMany(mappedBy = "books")
-    private List<Order> orders;
+    //"book" -> variable private Book book; in OrderBook.java
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderBook> orderBooks;
 }

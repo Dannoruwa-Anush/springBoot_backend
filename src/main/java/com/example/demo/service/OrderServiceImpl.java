@@ -1,10 +1,9 @@
 package com.example.demo.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,9 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.common.projectEnum.OrderStatus;
+import com.example.demo.dto.request.OrderBookRequestDTO;
 import com.example.demo.dto.request.OrderRequestDTO;
 import com.example.demo.entity.Book;
 import com.example.demo.entity.Order;
+import com.example.demo.entity.OrderBook;
 import com.example.demo.entity.User;
 import com.example.demo.repository.BookRepository;
 import com.example.demo.repository.OrderRepository;
@@ -36,23 +37,34 @@ public class OrderServiceImpl implements OrderService {
 
     private static final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
 
-    // Helper function for save & update order
-    private List<Book> fetchAndValidateBooks(Set<Long> bookIds) {
-        List<Book> books = bookRepository.findAllById(bookIds);
-        if (books.isEmpty()) {
-            throw new NoSuchElementException("No books found for the given book IDs.");
+    // ****
+    // Helper method to get all books and create OrderBook
+    private List<OrderBook> prepareOrderBooks(List<OrderBookRequestDTO> booksDTOs) {
+        List<OrderBook> orderBooks = new ArrayList<>();
+
+        for (OrderBookRequestDTO bookDTO : booksDTOs) {
+            // Fetch the book
+            Book book = bookRepository.findById(bookDTO.getBookId())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid book ID: " + bookDTO.getBookId()));
+
+            // Check stock
+            if (book.getQoh() < bookDTO.getQuantity()) {
+                throw new IllegalArgumentException("Insufficient stock for book: " + book.getTitle());
+            }
+
+            // Deduct stock
+            book.setQoh(book.getQoh() - bookDTO.getQuantity());
+
+            // Create OrderBook mapping
+            OrderBook orderBook = new OrderBook();
+            orderBook.setBook(book);
+            orderBook.setQuantity(bookDTO.getQuantity());
+            orderBooks.add(orderBook);
         }
 
-        books.forEach(book -> {
-            if (book.getQoh() <= 0) {
-                throw new IllegalStateException("Book with title '" + book.getTitle() + "' is out of stock.");
-            }
-            book.setQoh(book.getQoh() - 1);
-        });
-
-        return books;
+        return orderBooks;
     }
-    // ---
+    // ****
 
     @Override
     public List<Order> getAllOrders() {
@@ -81,27 +93,34 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public Order saveOrder(OrderRequestDTO orderRequestDTO) {
-        // Validate total amount
-        if (orderRequestDTO.getTotalAmount() <= 0) {
-            throw new IllegalArgumentException("Total amount must be a positive value.");
-        }
 
         // Fetch customer details
         User customer = userRepository.findById(orderRequestDTO.getCustomerId())
                 .orElseThrow(() -> new NoSuchElementException(
                         "Customer not found with userId: " + orderRequestDTO.getCustomerId()));
 
-        // Fetch and validate books
-        List<Book> books = fetchAndValidateBooks(orderRequestDTO.getBookIds());
+        // Prepare orderBooks
+        List<OrderBook> orderBooks = prepareOrderBooks(orderRequestDTO.getBooks());
 
-        // Create and populate order
+        // Calculate total amount
+        double totalAmount = orderBooks.stream()
+                .mapToDouble(orderBook -> orderBook.getBook().getUnitPrice() * orderBook.getQuantity())
+                .sum();
+
+        // Create and save order
         Order order = new Order();
-        order.setTotalAmount(orderRequestDTO.getTotalAmount());
-        order.setBooks(books);
-        order.setUser(customer);
-        order.setStatus(OrderStatus.PENDING); // Set status to PENDING
+        order.setTotalAmount(totalAmount);
 
-        // Save order
+        // set status to PENDING, when creating a new order
+        order.setStatus(OrderStatus.PENDING);
+        order.setOrderBooks(orderBooks);
+        order.setUser(customer);
+
+        // Persist order and associated orderBooks
+        for (OrderBook orderBook : orderBooks) {
+            orderBook.setOrder(order); // Set back-reference to the order
+        }
+
         return orderRepository.save(order);
     }
     // ---
@@ -121,35 +140,43 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public Order updateOrder(long id, OrderRequestDTO orderRequestDTO) {
         // Fetch existing order
-        Order existingOrder = getOrderById(id);
+        Order existingOrder = orderRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Order not found with ID: " + id));
 
-        // Validate order status
-        if (existingOrder.getStatus().equals(OrderStatus.DELIVERED) ||
-                existingOrder.getStatus().equals(OrderStatus.SHIPPED)) {
-            throw new IllegalArgumentException("This order cannot be updated, since it is already processed.");
+        // Check if the status of the order allows updates
+        if (existingOrder.getStatus() == OrderStatus.SHIPPED || existingOrder.getStatus() == OrderStatus.CANCELLED) {
+            throw new IllegalArgumentException("Cannot update a shipped or cancelled order.");
         }
 
-        // Restore stock for books in the existing order
-        existingOrder.getBooks().forEach(book -> book.setQoh(book.getQoh() + 1));
-
-        // Validate new order total amount
-        if (orderRequestDTO.getTotalAmount() <= 0) {
-            throw new IllegalArgumentException("Total amount must be a positive value.");
+        // Adjust stock for books in the old order
+        for (OrderBook orderBook : existingOrder.getOrderBooks()) {
+            Book book = orderBook.getBook();
+            book.setQoh(book.getQoh() + orderBook.getQuantity()); // Return stock
         }
 
-        // Fetch customer details
-        User customer = userRepository.findById(orderRequestDTO.getCustomerId())
-                .orElseThrow(() -> new NoSuchElementException(
-                        "Customer not found with userId: " + orderRequestDTO.getCustomerId()));
+        // Prepare new orderBooks
+        List<OrderBook> newOrderBooks = prepareOrderBooks(orderRequestDTO.getBooks());
 
-        // Fetch and validate books
-        List<Book> books = fetchAndValidateBooks(orderRequestDTO.getBookIds());
+        // Calculate total amount
+        double newTotalAmount = newOrderBooks.stream()
+                .mapToDouble(orderBook -> orderBook.getBook().getUnitPrice() * orderBook.getQuantity())
+                .sum();
 
-        // Update order details
-        existingOrder.setTotalAmount(orderRequestDTO.getTotalAmount());
-        existingOrder.setBooks(books);
-        existingOrder.setUser(customer);
-        existingOrder.setStatus(OrderStatus.PENDING); // Reset status to PENDING
+        // ********Update order details *********
+        existingOrder.setTotalAmount(newTotalAmount);
+
+        // set status to PENDING, when creating a new order
+        existingOrder.setStatus(OrderStatus.PENDING);
+
+        // Set the new books for the order
+        existingOrder.getOrderBooks().clear();
+        existingOrder.getOrderBooks().addAll(newOrderBooks);
+        // ****************************************
+
+        // Ensure bi-directional relationship
+        for (OrderBook orderBook : newOrderBooks) {
+            orderBook.setOrder(existingOrder);
+        }
 
         // Save and return the updated order
         return orderRepository.save(existingOrder);
@@ -158,9 +185,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void deleteOrder(long id) {
-        Optional<Order> existingOrder = orderRepository.findById(id);
-
-        if (!existingOrder.isPresent()) {
+        if (!orderRepository.existsById(id)) {
             throw new IllegalArgumentException("Order is not found with id: " + id);
         }
 
@@ -189,19 +214,54 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order updateOrderStatus(long id, OrderStatus newStatus) {
+
+        if (newStatus == OrderStatus.PENDING) {
+            // Status is set to PENDING automatically, when creationg or saving an order.
+            throw new IllegalArgumentException("Cannot update the status to PENDING.");
+        }
+
+        // get the order details
         Order existingOrder = getOrderById(id);
 
         // Validate the current state and the new state
+        if (existingOrder.getStatus() == OrderStatus.CANCELLED) {
+            throw new IllegalArgumentException("Cannot update the status of a cancelled order.");
+        }
+
         if (existingOrder.getStatus() == OrderStatus.DELIVERED && newStatus != OrderStatus.DELIVERED) {
             throw new IllegalArgumentException("Cannot change the status of a delivered order.");
         }
 
-        if (existingOrder.getStatus() == OrderStatus.CANCELLED) {
-            throw new IllegalArgumentException("Cannot update the status of a cancelled order.");
+        // Restore stock if transitioning to `CANCELLED`
+        if (newStatus == OrderStatus.CANCELLED) {
+            for (OrderBook orderBook : existingOrder.getOrderBooks()) {
+                Book book = orderBook.getBook();
+                book.setQoh(book.getQoh() + orderBook.getQuantity());
+            }
         }
 
         // Update status and save the order
         existingOrder.setStatus(newStatus);
         return orderRepository.save(existingOrder);
     }
+    // ----
+
+    @Override
+    public double calculateTotalAmount(List<OrderBookRequestDTO> booksDTOs) {
+        double totalAmount = 0;
+
+        for (OrderBookRequestDTO bookDTO : booksDTOs) {
+            Book book = bookRepository.findById(bookDTO.getBookId())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid book ID: " + bookDTO.getBookId()));
+
+            if (book.getQoh() < bookDTO.getQuantity()) {
+                throw new IllegalArgumentException("Insufficient stock for book: " + book.getTitle());
+            }
+
+            totalAmount += book.getUnitPrice() * bookDTO.getQuantity();
+        }
+
+        return totalAmount;
+    }
+    // ----
 }

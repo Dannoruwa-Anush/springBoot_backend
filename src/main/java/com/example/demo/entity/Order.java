@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.example.demo.common.projectEnum.OrderStatus;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -16,9 +17,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -90,11 +90,11 @@ public class Order {
      * LAZY: This means that the related entities (in the Many-to-Many relationship)
      * will not be fetched immediately when the parent entity is loaded.
      */
-    // Order (Many) --- (Many) Book
+    // Order (One) --- (Many) OrderBooks
     // Order side relationship
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "order_books", joinColumns = @JoinColumn(name = "order_id"), inverseJoinColumns = @JoinColumn(name = "book_id"))
-    private List<Book> books;
+    //"order" -> variable private Order order; in OrderBook.java
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderBook> orderBooks;
 
     // User (One) --- (Many) Order
     // FK : id ->User
