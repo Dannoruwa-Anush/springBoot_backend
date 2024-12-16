@@ -17,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.common.customException.FirstLoginCustomException;
+import com.example.demo.common.projectEnum.RoleName;
 import com.example.demo.dto.request.CustomerRegistrationDTO;
 import com.example.demo.dto.request.UserFindRequestDTO;
 import com.example.demo.dto.request.UserLoginRequestDTO;
@@ -164,7 +165,7 @@ public class UserServiceImpl implements UserService {
                .orElseThrow(() -> new IllegalArgumentException("Role is not found : " + roleId));
 
          // Validate roles
-         if ("Admin".equals(role.getRoleName()) || "Customer".equals(role.getRoleName())) {
+         if (RoleName.ADMIN.getRoleName().equals(role.getRoleName()) || RoleName.CUSTOMER.getRoleName().equals(role.getRoleName())) {
             throw new IllegalArgumentException("Unauthorized role assignment: '" + role.getRoleName() + "'.");
          }
 
@@ -197,7 +198,7 @@ public class UserServiceImpl implements UserService {
 
       // Roles are set as ["Customer"] at user registration
       // find matching Role entity by matching role name "Customer"
-      Set<String> roleNames = Set.of("Customer");
+      Set<String> roleNames = Set.of(RoleName.CUSTOMER.getRoleName());
       Set<Role> roles = roleNames.stream()
             .map(roleName -> roleRepository.findByRoleName(roleName)
                   .orElseThrow(() -> new IllegalArgumentException("Invalid role: " + roleName))) // Throws exception if
@@ -251,7 +252,7 @@ public class UserServiceImpl implements UserService {
 
       // Default temporary password is set at the creation of admin and staff roles
       // Password reset is needed only for this roles at the first time login
-      if (user.isFirstLogin() && !roleNames.contains("Customer")) {
+      if (user.isFirstLogin() && !roleNames.contains(RoleName.CUSTOMER.getRoleName())) {
          throw new FirstLoginCustomException("Password reset required for first login");
       }
 

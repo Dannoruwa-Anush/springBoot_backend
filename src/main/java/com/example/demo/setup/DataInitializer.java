@@ -8,6 +8,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import com.example.demo.common.projectEnum.PermissionName;
+import com.example.demo.common.projectEnum.RoleName;
 import com.example.demo.entity.Role;
 import com.example.demo.entity.User;
 import com.example.demo.entity.UserPermission;
@@ -77,11 +79,11 @@ public class DataInitializer implements CommandLineRunner {
             User admin = new User();
             admin.setUsername("admin");
             admin.setEmail("admin@system.com");
-            
-            //Temporary password is assigned
+
+            // Temporary password is assigned
             String tempPassword = "admin";
-            admin.setPassword(passwordEncoder.encode(tempPassword)); //Encode temporary password before setting
-            
+            admin.setPassword(passwordEncoder.encode(tempPassword)); // Encode temporary password before setting
+
             admin.setAddress("System Admin");
             admin.setTelephoneNumber("0000000000");
             admin.setRoles(Set.of(adminRole));
@@ -103,23 +105,23 @@ public class DataInitializer implements CommandLineRunner {
          */
 
         // Check and create permissions if they don't exist
-        createPermissionIfNotExist("CREATE");
-        createPermissionIfNotExist("VIEW");
-        createPermissionIfNotExist("DELETE");
-        createPermissionIfNotExist("UPDATE");
+        createPermissionIfNotExist(PermissionName.CREATE.getPermissionName());
+        createPermissionIfNotExist(PermissionName.VIEW.getPermissionName());
+        createPermissionIfNotExist(PermissionName.DELETE.getPermissionName());
+        createPermissionIfNotExist(PermissionName.UPDATE.getPermissionName());
 
         // Check and create roles with the necessary permissions
         // 1. Admin role
-        createRoleIfNotExists("Admin", Set.of("CREATE", "VIEW", "DELETE", "UPDATE"));
+        createRoleIfNotExists(RoleName.ADMIN.getRoleName(), Set.of(PermissionName.CREATE.getPermissionName(), PermissionName.VIEW.getPermissionName(), PermissionName.UPDATE.getPermissionName(), PermissionName.DELETE.getPermissionName()));
 
-        // 2. Cashier role
-        createRoleIfNotExists("Cashier", Set.of("CREATE", "VIEW"));
+        // 2. Manager role
+        createRoleIfNotExists(RoleName.MANAGER.getRoleName(), Set.of(PermissionName.CREATE.getPermissionName(), PermissionName.VIEW.getPermissionName(), PermissionName.UPDATE.getPermissionName()));
 
-        // 3. Customer role
-        createRoleIfNotExists("Customer", Set.of("CREATE", "VIEW"));
+        // 3. Cashier role
+        createRoleIfNotExists(RoleName.CASHIER.getRoleName(), Set.of(PermissionName.CREATE.getPermissionName(), PermissionName.VIEW.getPermissionName()));
 
-        // 4. Manager role
-        createRoleIfNotExists("Manager", Set.of("CREATE", "VIEW", "UPDATE"));
+        // 4. Customer role
+        createRoleIfNotExists(RoleName.CUSTOMER.getRoleName(), Set.of(PermissionName.CREATE.getPermissionName(), PermissionName.VIEW.getPermissionName()));
 
         // Create admin user if it doesn't exist
         createAdminUserProfileIfNotExist();
