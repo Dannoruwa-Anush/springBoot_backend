@@ -200,6 +200,7 @@ public class WebSecurityConfig {
 
                         // Access is unauthenticated (for all)
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/uploads/***").permitAll() //image file saving directory
                         .requestMatchers(HttpMethod.GET, "/category/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/subCategory/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/author/**").permitAll()

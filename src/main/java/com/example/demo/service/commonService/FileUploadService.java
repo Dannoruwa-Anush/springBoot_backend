@@ -66,6 +66,6 @@ public class FileUploadService {
         Path targetPath = Paths.get(uploadDirectory, uniqueFileName);
         file.transferTo(targetPath);
 
-        return targetPath.toString();
+        return uniqueFileName;
     }
 }
