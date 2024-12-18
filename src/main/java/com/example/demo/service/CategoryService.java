@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.request.CategoryRequestDTO;
 import com.example.demo.dto.response.CategoryResponseDTO;
+import com.example.demo.dto.response.CategoryWithSubCategoryResponseDTO;
 
 @Service
 public interface CategoryService {
@@ -19,4 +20,6 @@ public interface CategoryService {
     CategoryResponseDTO updateCategory(long id, CategoryRequestDTO categoryRequestDTO);
 
     void deleteCategory(long id);
+
+    List<CategoryWithSubCategoryResponseDTO> getAllCategoriesWithRelatedSubCategories();
 }

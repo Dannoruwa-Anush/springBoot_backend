@@ -6,14 +6,15 @@ import java.util.NoSuchElementException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.common.customHttpResponse.CustomErrorResponse;
 import com.example.demo.dto.request.CategoryRequestDTO;
 import com.example.demo.dto.response.CategoryResponseDTO;
+import com.example.demo.dto.response.CategoryWithSubCategoryResponseDTO;
 import com.example.demo.service.CategoryService;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,7 +25,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 
 
 @RestController
-@RequestMapping("category")
+/*
+ * It allows you to specify which external origins (i.e., domains or URLs) are
+ * permitted to make requests to your API. This is useful when your frontend
+ * application (running on a different server or port) needs to interact with
+ * your backend
+ */
+@CrossOrigin(origins = "*")
 public class CategoryController {
 
     @Autowired
@@ -44,7 +51,7 @@ public class CategoryController {
      * without any associated content in the response body.
      */
 
-    @GetMapping
+    @GetMapping("/category")
     public ResponseEntity<List<CategoryResponseDTO>> getAllCategories() {
         List<CategoryResponseDTO> categories = categoryService.getAllCategories();
 
@@ -56,7 +63,7 @@ public class CategoryController {
     }
     //---
 
-    @GetMapping("/{id}")
+    @GetMapping("/category/{id}")
     public ResponseEntity<CategoryResponseDTO> getAllCategoryById(@PathVariable Long id){
         try {
             CategoryResponseDTO category = categoryService.getCategoryById(id);
@@ -70,7 +77,7 @@ public class CategoryController {
     //---
 
     
-    @PostMapping
+    @PostMapping("/category")
     public ResponseEntity<Object> createCategory(@RequestBody CategoryRequestDTO categoryRequestDTO){
         try {
             CategoryResponseDTO savedCategory = categoryService.saveCategory(categoryRequestDTO);
@@ -83,7 +90,7 @@ public class CategoryController {
     }
     //---
 
-    @PutMapping("{id}")
+    @PutMapping("/category/{id}")
     public ResponseEntity<Object> updateCategory(@PathVariable Long id, @RequestBody CategoryRequestDTO categoryRequestDTO){
         try {
             CategoryResponseDTO updatedCategory = categoryService.updateCategory(id, categoryRequestDTO);
@@ -99,7 +106,7 @@ public class CategoryController {
     }
     //---
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/category/{id}")
     public ResponseEntity<Object> deleteCategory(@PathVariable Long id){
         try {
             categoryService.deleteCategory(id);
@@ -114,4 +121,16 @@ public class CategoryController {
         }
     }
     //---
+
+    @GetMapping("/category/subCategory")
+    public ResponseEntity<List<CategoryWithSubCategoryResponseDTO>> getAllCategoriesWithRelatedSubCategories() {
+        List<CategoryWithSubCategoryResponseDTO> categories = categoryService.getAllCategoriesWithRelatedSubCategories();
+
+        if (categories.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+
+        return ResponseEntity.status((HttpStatus.OK)).body(categories);
+    }
+    //-----
 }
