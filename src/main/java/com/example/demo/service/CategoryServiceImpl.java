@@ -1,9 +1,9 @@
 package com.example.demo.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.example.demo.dto.request.CategoryRequestDTO;
 import com.example.demo.dto.response.CategoryResponseDTO;
 import com.example.demo.dto.response.CategoryWithSubCategoryResponseDTO;
+import com.example.demo.dto.response.SubCategoryFilterResponseDTO;
 import com.example.demo.entity.Category;
 import com.example.demo.entity.SubCategory;
 import com.example.demo.repository.CategoryRepository;
@@ -36,15 +37,26 @@ public class CategoryServiceImpl implements CategoryService {
     }
     // ---
 
+    //----
+    private List<SubCategoryFilterResponseDTO> toSubCategoryFilterResponseDTO(List<SubCategory> subCategories){
+        List<SubCategoryFilterResponseDTO> listDTOs = new ArrayList<>();
+
+        for(SubCategory subCategory : subCategories){
+            SubCategoryFilterResponseDTO dto = new SubCategoryFilterResponseDTO();
+            dto.setId(subCategory.getId());
+            dto.setSubCategoryName(subCategory.getSubCategoryName());
+
+            listDTOs.add(dto);
+        }
+        return listDTOs;
+    }
+    //----
+
     private CategoryWithSubCategoryResponseDTO toCategoryWithSubCategoryResponseDTO(Category category) {
         CategoryWithSubCategoryResponseDTO dto = new CategoryWithSubCategoryResponseDTO();
         dto.setId(category.getId());
         dto.setCategoryName(category.getCategoryName());
-
-        // Convert SubCategories to a set of names
-        Set<String> subCategoriesName = category.getSubcategories().stream().map(SubCategory::getSubCategoryName).collect(Collectors.toSet());
-
-        dto.setSubCategoriesNames(subCategoriesName);
+        dto.setSubCategories(toSubCategoryFilterResponseDTO(category.getSubcategories()));
         return dto;
     }
     // ********

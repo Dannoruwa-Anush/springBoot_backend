@@ -1,6 +1,6 @@
 package com.example.demo.dto.response;
 
-import java.util.Set;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,5 +13,5 @@ public class CategoryWithSubCategoryResponseDTO {
     //DTO specifies exactly what fields should be serialized.
     private Long id;
     private String categoryName;
-    private Set<String> subCategoriesNames;   
+    private List<SubCategoryFilterResponseDTO> subCategories;   
 }
