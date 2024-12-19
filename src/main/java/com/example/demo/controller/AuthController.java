@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -83,10 +84,10 @@ public class AuthController {
     }
     // ---
 
-    @PutMapping("/auth/password-reset")
-    public ResponseEntity<Object> resetPassword(@RequestBody UserPaswordResetRequestDTO userPaswordResetRequestDTO) {
+    @PutMapping("/auth/password-reset/{id}")
+    public ResponseEntity<Object> resetPassword(@PathVariable Long id, @RequestBody UserPaswordResetRequestDTO userPaswordResetRequestDTO) {
         try {
-            userService.isPasswordReset(userPaswordResetRequestDTO);
+            userService.isPasswordReset(id, userPaswordResetRequestDTO);
             return ResponseEntity.status(HttpStatus.OK)
                     .body(Map.of("message", "Password reset successful", "status", HttpStatus.OK.value()));
         } catch (NoSuchElementException e) {

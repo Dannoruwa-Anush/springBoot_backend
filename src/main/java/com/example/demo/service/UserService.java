@@ -24,7 +24,7 @@ public interface UserService {
 
 
     //for AuthController
-    boolean isPasswordReset(UserPaswordResetRequestDTO userPaswordResetRequestDTO);
+    boolean isPasswordReset(Long id, UserPaswordResetRequestDTO userPaswordResetRequestDTO);
     UserResponseDTO addCustomer(CustomerRegistrationDTO customerRegistrationDTO);
     JwtResponseDTO loginUser(UserLoginRequestDTO loginRequest);
     UserResponseDTO getUserByUsername(UserFindRequestDTO userFindRequestDTO);

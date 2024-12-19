@@ -116,10 +116,10 @@ public class UserServiceImpl implements UserService {
 
    // ---
    @Override
-   public boolean isPasswordReset(UserPaswordResetRequestDTO userPaswordResetRequestDTO) {
+   public boolean isPasswordReset(Long id, UserPaswordResetRequestDTO userPaswordResetRequestDTO) {
       // get existing user
-      User existingUser = userRepository.findById(userPaswordResetRequestDTO.getId())
-            .orElseThrow(() -> new NoSuchElementException("User is not found" + userPaswordResetRequestDTO.getId()));
+      User existingUser = userRepository.findById(id)
+            .orElseThrow(() -> new NoSuchElementException("User is not found" + id));
 
       // Encode temporary password before setting
       existingUser.setPassword(passwordEncoder.encode(userPaswordResetRequestDTO.getNewPassword()));
