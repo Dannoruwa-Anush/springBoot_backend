@@ -72,12 +72,13 @@ public class RoleServiceImpl implements RoleService {
             throw new IllegalArgumentException("Role with name '" + roleRequestDTO.getRoleName() + "' already exists.");
         }
 
-        //Create a new role
+        // Create a new role
         Role saveToRole = new Role();
         saveToRole.setRoleName(roleRequestDTO.getRoleName());
 
         // Fetch and set permissions
-        List<UserPermission> requestPermissionList = userPermissionRepository.findAllById(roleRequestDTO.getPermissionIds());
+        List<UserPermission> requestPermissionList = userPermissionRepository
+                .findAllById(roleRequestDTO.getPermissionIds());
 
         // Use a temporary set to safely handle permissions
         Set<UserPermission> requestPermissionSet = new HashSet<>(requestPermissionList);
@@ -129,6 +130,14 @@ public class RoleServiceImpl implements RoleService {
     public void deleteRole(long id) {
         if (!roleRepository.existsById(id)) {
             throw new IllegalArgumentException("Role is not found with id: " + id);
+        }
+
+        // Check if any users are associated with the role
+        Role role = roleRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Role is not found " + id));
+
+        if (role.getUsers() != null && !role.getUsers().isEmpty()) {
+            throw new IllegalStateException("Cannot delete role because it is assigned to one or more users.");
         }
 
         roleRepository.deleteById(id);
