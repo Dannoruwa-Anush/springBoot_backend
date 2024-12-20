@@ -6,6 +6,7 @@ import java.util.NoSuchElementException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +23,13 @@ import com.example.demo.service.SubCategoryService;
 
 @RestController
 @RequestMapping("subCategory")
+/*
+ * It allows you to specify which external origins (i.e., domains or URLs) are
+ * permitted to make requests to your API. This is useful when your frontend
+ * application (running on a different server or port) needs to interact with
+ * your backend
+ */
+@CrossOrigin(origins = "*")
 public class SubCategoryController {
 
     @Autowired
