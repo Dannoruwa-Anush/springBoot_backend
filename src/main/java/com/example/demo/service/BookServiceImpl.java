@@ -17,6 +17,7 @@ import com.example.demo.entity.Book;
 import com.example.demo.entity.SubCategory;
 import com.example.demo.repository.AuthorRepository;
 import com.example.demo.repository.BookRepository;
+import com.example.demo.repository.OrderBookRepository;
 import com.example.demo.repository.SubCategoryRepository;
 import com.example.demo.service.commonService.FileUploadService;
 
@@ -34,6 +35,9 @@ public class BookServiceImpl implements BookService {
 
     @Autowired
     private SubCategoryRepository subCategoryRepository;
+
+    @Autowired
+    private OrderBookRepository orderBookRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(BookServiceImpl.class);
 
@@ -169,6 +173,13 @@ public class BookServiceImpl implements BookService {
         if (!bookRepository.existsById(id)) {
             throw new IllegalArgumentException("Book is not found with id: " + id);
         }
+
+        // Check if any Orders are associated with the book
+        boolean hasOrders = orderBookRepository.existsByBookId(id);
+        if (hasOrders) {
+            throw new IllegalStateException("Cannot delete Book with associated Orders.");
+        }
+
         bookRepository.deleteById(id);
         logger.info("Book with id {} was deleted.", id);
     }
