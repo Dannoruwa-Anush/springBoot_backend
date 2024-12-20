@@ -14,6 +14,7 @@ import com.example.demo.dto.request.SubCategoryRequestDTO;
 import com.example.demo.dto.response.SubCategoryResponseDTO;
 import com.example.demo.entity.Category;
 import com.example.demo.entity.SubCategory;
+import com.example.demo.repository.BookRepository;
 import com.example.demo.repository.CategoryRepository;
 import com.example.demo.repository.SubCategoryRepository;
 
@@ -25,6 +26,9 @@ public class SubCategoryServiceImpl implements SubCategoryService {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private BookRepository bookRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(SubCategoryServiceImpl.class);
 
@@ -114,6 +118,12 @@ public class SubCategoryServiceImpl implements SubCategoryService {
 
         if (!subCategoryRepository.existsById(id)) {
             throw new IllegalArgumentException("SubCategory is not found with id: " + id);
+        }
+
+        // Check if any books are associated with the subCategory
+        boolean hasBooks = bookRepository.existsBySubCategoryId(id);
+        if (hasBooks) {
+            throw new IllegalStateException("Cannot delete SubCategory with associated Books.");
         }
 
         subCategoryRepository.deleteById(id);

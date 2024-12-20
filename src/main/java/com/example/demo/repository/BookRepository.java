@@ -46,4 +46,6 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     // JPQL query
     @Query("SELECT b FROM Book b WHERE b.subCategory.category.id = :inputCategoryId")
     List<Book> findAllBooksByCategoryId(@Param("inputCategoryId") Long inputCategoryId);
+
+    boolean existsBySubCategoryId(long subCategoryId);
 }
