@@ -28,6 +28,7 @@ import com.example.demo.dto.response.JwtResponseDTO;
 import com.example.demo.dto.response.UserResponseDTO;
 import com.example.demo.entity.Role;
 import com.example.demo.entity.User;
+import com.example.demo.repository.OrderRepository;
 import com.example.demo.repository.RoleRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.security.jwt.JwtUtils;
@@ -49,6 +50,9 @@ public class UserServiceImpl implements UserService {
 
    @Autowired
    JwtUtils jwtUtils;
+
+   @Autowired
+   private OrderRepository orderRepository;
 
    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
@@ -109,6 +113,13 @@ public class UserServiceImpl implements UserService {
       if (!userRepository.existsById(id)) {
          throw new IllegalArgumentException("User is not found with id: " + id);
       }
+
+      // Check if any Orders are associated with the user
+      boolean hasOrders = orderRepository.existsByUserId(id);
+      if (hasOrders) {
+         throw new IllegalStateException("Cannot delete user with associated Orders.");
+      }
+
       userRepository.deleteById(id);
       logger.info("User with id {} was deleted.", id);
    }
@@ -165,7 +176,8 @@ public class UserServiceImpl implements UserService {
                .orElseThrow(() -> new IllegalArgumentException("Role is not found : " + roleId));
 
          // Validate roles
-         if (RoleName.ADMIN.getRoleName().equals(role.getRoleName()) || RoleName.CUSTOMER.getRoleName().equals(role.getRoleName())) {
+         if (RoleName.ADMIN.getRoleName().equals(role.getRoleName())
+               || RoleName.CUSTOMER.getRoleName().equals(role.getRoleName())) {
             throw new IllegalArgumentException("Unauthorized role assignment: '" + role.getRoleName() + "'.");
          }
 
@@ -209,8 +221,9 @@ public class UserServiceImpl implements UserService {
       User newCustomerToSave = new User();
       newCustomerToSave.setUsername(customerRegistrationDTO.getUsername());
       newCustomerToSave.setEmail(customerRegistrationDTO.getEmail());
-      newCustomerToSave.setPassword(passwordEncoder.encode(customerRegistrationDTO.getPassword())); // Encode password before
-                                                                                              // setting
+      newCustomerToSave.setPassword(passwordEncoder.encode(customerRegistrationDTO.getPassword())); // Encode password
+                                                                                                    // before
+      // setting
       newCustomerToSave.setAddress(customerRegistrationDTO.getAddress());
       newCustomerToSave.setTelephoneNumber(customerRegistrationDTO.getTelephoneNumber());
       newCustomerToSave.setRoles(roles);
@@ -266,8 +279,9 @@ public class UserServiceImpl implements UserService {
    // ---
    @Override
    public UserResponseDTO getUserByUsername(UserFindRequestDTO userFindRequestDTO) {
-      User user = userRepository.findByUsername(userFindRequestDTO.getUsername()).orElseThrow(() -> new NoSuchElementException("User is not found bu username :" + userFindRequestDTO.getUsername()));
-      
+      User user = userRepository.findByUsername(userFindRequestDTO.getUsername()).orElseThrow(
+            () -> new NoSuchElementException("User is not found bu username :" + userFindRequestDTO.getUsername()));
+
       return toUserResponseDTO(user);
    }
    // ---

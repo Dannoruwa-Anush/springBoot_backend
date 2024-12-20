@@ -38,4 +38,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     // JPQL query
     @Query("SELECT o FROM Order o WHERE FUNCTION('DATE', o.createdAt) = :inputOrderPlacedDate AND o.status = :inputOrderStatus")
     List<Order> findAllOrdersByDateAndStatus(@Param("inputOrderPlacedDate") LocalDate inputOrderPlacedDate, @Param("inputOrderStatus") OrderStatus inputOrderStatus);
+
+    boolean existsByUserId(long userId);
 }
