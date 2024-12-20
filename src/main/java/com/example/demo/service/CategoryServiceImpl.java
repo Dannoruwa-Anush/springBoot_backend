@@ -33,7 +33,9 @@ public class CategoryServiceImpl implements CategoryService {
     private static final Logger logger = LoggerFactory.getLogger(CategoryServiceImpl.class);
 
     // ********
-    private CategoryResponseDTO toCategoryResponseDTO(Category category) {
+    //This DTO will use in other services as well
+    @Override
+    public CategoryResponseDTO toCategoryResponseDTO(Category category) {
         CategoryResponseDTO dto = new CategoryResponseDTO();
         dto.setId(category.getId());
         dto.setCategoryName(category.getCategoryName());

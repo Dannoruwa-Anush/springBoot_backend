@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.common.customHttpResponse.CustomErrorResponse;
 import com.example.demo.dto.request.SubCategoryRequestDTO;
 import com.example.demo.dto.response.SubCategoryResponseDTO;
+import com.example.demo.dto.response.getById.SubCategoryGetByIdResponseDTO;
 import com.example.demo.service.SubCategoryService;
 
 @RestController
@@ -64,9 +65,9 @@ public class SubCategoryController {
     // ---
 
     @GetMapping("/{id}")
-    public ResponseEntity<SubCategoryResponseDTO> getAllSubCategoryById(@PathVariable Long id) {
+    public ResponseEntity<SubCategoryGetByIdResponseDTO> getAllSubCategoryById(@PathVariable Long id) {
         try {
-            SubCategoryResponseDTO subCategory = subCategoryService.getSubCategoryById(id);
+            SubCategoryGetByIdResponseDTO subCategory = subCategoryService.getSubCategoryById(id);
             return ResponseEntity.status(HttpStatus.OK).body(subCategory);
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);

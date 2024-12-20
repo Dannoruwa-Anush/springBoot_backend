@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.request.SubCategoryRequestDTO;
 import com.example.demo.dto.response.SubCategoryResponseDTO;
+import com.example.demo.dto.response.getById.SubCategoryGetByIdResponseDTO;
 import com.example.demo.entity.Category;
 import com.example.demo.entity.SubCategory;
 import com.example.demo.repository.BookRepository;
@@ -30,6 +31,9 @@ public class SubCategoryServiceImpl implements SubCategoryService {
     @Autowired
     private BookRepository bookRepository;
 
+    @Autowired
+    private CategoryService categoryService; //to use DTO of category
+
     private static final Logger logger = LoggerFactory.getLogger(SubCategoryServiceImpl.class);
 
     // ****
@@ -45,6 +49,17 @@ public class SubCategoryServiceImpl implements SubCategoryService {
 
         return responseDto;
     }
+    //-----
+
+    //-----
+    private SubCategoryGetByIdResponseDTO toSubCategoryGetByIdResponseDTO(SubCategory subCategory){
+        SubCategoryGetByIdResponseDTO dto = new SubCategoryGetByIdResponseDTO();
+        dto.setId(subCategory.getId());
+        dto.setSubCategoryName(subCategory.getSubCategoryName());
+        dto.setCategory(categoryService.toCategoryResponseDTO(subCategory.getCategory()));
+        return dto;
+    }
+    //-----
     // ****
 
     @Override
@@ -56,11 +71,11 @@ public class SubCategoryServiceImpl implements SubCategoryService {
     }
 
     @Override
-    public SubCategoryResponseDTO getSubCategoryById(long id) {
+    public SubCategoryGetByIdResponseDTO getSubCategoryById(long id) {
         SubCategory subcategory = subCategoryRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("SubCategory is not found with id: " + id));
 
-        return toSubCategoryResponseDTO(subcategory);
+        return toSubCategoryGetByIdResponseDTO(subcategory);
     }
     // ---
 

@@ -6,13 +6,14 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.request.SubCategoryRequestDTO;
 import com.example.demo.dto.response.SubCategoryResponseDTO;
+import com.example.demo.dto.response.getById.SubCategoryGetByIdResponseDTO;
 
 @Service
 public interface SubCategoryService {
     
     List<SubCategoryResponseDTO> getAllSubCategories();
 
-    SubCategoryResponseDTO getSubCategoryById(long id);
+    SubCategoryGetByIdResponseDTO getSubCategoryById(long id);
 
     SubCategoryResponseDTO saveSubCategory(SubCategoryRequestDTO subCategorySaveRequestDTO);
 
