@@ -92,6 +92,15 @@ public class UserPermissionServiceImpl implements UserPermissionService {
         if (!userPermissionRepository.existsById(id)) {
             throw new IllegalArgumentException("Permission is not found with id: " + id);
         }
+
+        // Check if any roles are associated with the userpermission
+        UserPermission userPermission = userPermissionRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Permission is not found " + id));
+
+        if(userPermission.getRoles() != null && !userPermission.getRoles().isEmpty()){
+            throw new IllegalStateException("Cannot delete Permission because it is assigned to one or more roles.");
+        }
+
         userPermissionRepository.deleteById(id);
         logger.info("Permission with id {} was deleted.", id);
     }
