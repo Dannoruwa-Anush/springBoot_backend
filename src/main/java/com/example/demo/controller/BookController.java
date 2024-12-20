@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.common.customHttpResponse.CustomErrorResponse;
 import com.example.demo.dto.request.BookRequestDTO;
 import com.example.demo.dto.response.BookResponseDTO;
+import com.example.demo.dto.response.getById.BooKGetByIdResponseDTO;
 import com.example.demo.service.BookService;
 
 @RestController
@@ -60,9 +61,9 @@ public class BookController {
     // ---
 
     @GetMapping("/book/{id}")
-    public ResponseEntity<BookResponseDTO> getAllBookById(@PathVariable Long id) {
+    public ResponseEntity<BooKGetByIdResponseDTO> getBookById(@PathVariable Long id) {
         try {
-            BookResponseDTO book = bookService.getBookById(id);
+            BooKGetByIdResponseDTO book = bookService.getBookById(id);
             return ResponseEntity.status(HttpStatus.OK).body(book);
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);

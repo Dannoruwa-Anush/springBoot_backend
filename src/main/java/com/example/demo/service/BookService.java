@@ -6,13 +6,14 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.request.BookRequestDTO;
 import com.example.demo.dto.response.BookResponseDTO;
+import com.example.demo.dto.response.getById.BooKGetByIdResponseDTO;
 
 @Service
 public interface BookService {
 
     List<BookResponseDTO> getAllBooks();
 
-    BookResponseDTO getBookById(long id);
+    BooKGetByIdResponseDTO getBookById(long id);
 
     BookResponseDTO saveBook(BookRequestDTO bookSaveRequestDTO);
 

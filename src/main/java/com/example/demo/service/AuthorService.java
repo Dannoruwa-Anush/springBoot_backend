@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.request.AuthorRequestDTO;
 import com.example.demo.dto.response.AuthorResponseDTO;
+import com.example.demo.entity.Author;
 
 @Service
 public interface AuthorService {
@@ -19,4 +20,7 @@ public interface AuthorService {
     AuthorResponseDTO updateAuthor(long id, AuthorRequestDTO authorRequestDTO);
 
     void deleteAuthor(long id);
+
+    //entity -> dto
+    AuthorResponseDTO toAuthorResponseDTO(Author author);
 }

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.request.BookRequestDTO;
 import com.example.demo.dto.response.BookResponseDTO;
+import com.example.demo.dto.response.getById.BooKGetByIdResponseDTO;
 import com.example.demo.entity.Author;
 import com.example.demo.entity.Book;
 import com.example.demo.entity.SubCategory;
@@ -39,6 +40,12 @@ public class BookServiceImpl implements BookService {
     @Autowired
     private OrderBookRepository orderBookRepository;
 
+    @Autowired
+    private AuthorService authorService; // to DTO conversion
+
+    @Autowired
+    private SubCategoryService subCategoryService; // to DTO conversion
+
     private static final Logger logger = LoggerFactory.getLogger(BookServiceImpl.class);
 
     // ****
@@ -55,6 +62,21 @@ public class BookServiceImpl implements BookService {
 
         return dto;
     }
+    //-----
+
+    //----
+    private BooKGetByIdResponseDTO toBooKGetByIdresponseDTO(Book book){
+        BooKGetByIdResponseDTO dto = new BooKGetByIdResponseDTO();
+        dto.setId(book.getId());
+        dto.setTitle(book.getTitle());
+        dto.setUnitPrice(book.getUnitPrice());
+        dto.setQoh(book.getQoh());
+        dto.setCoverImage(book.getCoverImage());
+        dto.setAuthor(authorService.toAuthorResponseDTO(book.getAuthor()));
+        dto.setSubCategory(subCategoryService.toSubCategoryResponseDTO(book.getSubCategory()));
+        return dto;
+    }
+    //----
     // ****
 
     // Helper class to validate book save/update request
@@ -86,11 +108,11 @@ public class BookServiceImpl implements BookService {
     // ---
 
     @Override
-    public BookResponseDTO getBookById(long id) {
+    public BooKGetByIdResponseDTO getBookById(long id) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Book is not found with id: " + id));
 
-        return toBookResponseDTO(book);
+        return toBooKGetByIdresponseDTO(book);
     }
     // ---
 

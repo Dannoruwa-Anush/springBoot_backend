@@ -28,7 +28,8 @@ public class AuthorServiceImpl implements AuthorService {
     private static final Logger logger = LoggerFactory.getLogger(AuthorServiceImpl.class);
 
     // ****
-    private AuthorResponseDTO toAuthorResponseDTO(Author author) {
+    @Override
+    public AuthorResponseDTO toAuthorResponseDTO(Author author) {
         AuthorResponseDTO responseDto = new AuthorResponseDTO();
         responseDto.setId(author.getId());
         responseDto.setAuthorName(author.getAuthorName());

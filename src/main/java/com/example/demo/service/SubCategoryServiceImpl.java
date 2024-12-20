@@ -37,7 +37,8 @@ public class SubCategoryServiceImpl implements SubCategoryService {
     private static final Logger logger = LoggerFactory.getLogger(SubCategoryServiceImpl.class);
 
     // ****
-    private SubCategoryResponseDTO toSubCategoryResponseDTO(SubCategory subCategory) {
+    @Override
+    public SubCategoryResponseDTO toSubCategoryResponseDTO(SubCategory subCategory) {
         SubCategoryResponseDTO responseDto = new SubCategoryResponseDTO();
         responseDto.setId(subCategory.getId());
         responseDto.setSubCategoryName(subCategory.getSubCategoryName());
