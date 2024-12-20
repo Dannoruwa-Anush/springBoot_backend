@@ -48,4 +48,6 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     List<Book> findAllBooksByCategoryId(@Param("inputCategoryId") Long inputCategoryId);
 
     boolean existsBySubCategoryId(long subCategoryId);
+
+    boolean existsByAuthorId(long authorId);
 }

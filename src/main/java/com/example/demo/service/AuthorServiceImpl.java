@@ -14,12 +14,16 @@ import com.example.demo.dto.request.AuthorRequestDTO;
 import com.example.demo.dto.response.AuthorResponseDTO;
 import com.example.demo.entity.Author;
 import com.example.demo.repository.AuthorRepository;
+import com.example.demo.repository.BookRepository;
 
 @Service
 public class AuthorServiceImpl implements AuthorService {
 
     @Autowired
     private AuthorRepository authorRepository;
+
+    @Autowired
+    private BookRepository bookRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthorServiceImpl.class);
 
@@ -72,12 +76,13 @@ public class AuthorServiceImpl implements AuthorService {
         Author existingAuthor = authorRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Author is not found with id: " + id));
 
-        if ((existingAuthor.getAuthorName()).equals(authorRequestDTO.getAuthorName())&&
-        authorRepository.findAuthorByAuthorName(authorRequestDTO.getAuthorName()).isPresent()) {
-            throw new IllegalArgumentException("Author with name " + authorRequestDTO.getAuthorName() + " already exists");
+        if ((existingAuthor.getAuthorName()).equals(authorRequestDTO.getAuthorName()) &&
+                authorRepository.findAuthorByAuthorName(authorRequestDTO.getAuthorName()).isPresent()) {
+            throw new IllegalArgumentException(
+                    "Author with name " + authorRequestDTO.getAuthorName() + " already exists");
         }
 
-        //update
+        // update
         existingAuthor.setAuthorName(authorRequestDTO.getAuthorName());
         return toAuthorResponseDTO(authorRepository.save(existingAuthor));
     }
@@ -88,6 +93,12 @@ public class AuthorServiceImpl implements AuthorService {
 
         if (!authorRepository.existsById(id)) {
             throw new IllegalArgumentException("Author is not found with id: " + id);
+        }
+
+        // Check if any books are associated with the author
+        boolean hasBooks = bookRepository.existsByAuthorId(id);
+        if (hasBooks) {
+            throw new IllegalStateException("Cannot delete Author with associated Books.");
         }
 
         authorRepository.deleteById(id);
