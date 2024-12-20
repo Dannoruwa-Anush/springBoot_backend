@@ -18,12 +18,16 @@ import com.example.demo.dto.response.SubCategoryFilterResponseDTO;
 import com.example.demo.entity.Category;
 import com.example.demo.entity.SubCategory;
 import com.example.demo.repository.CategoryRepository;
+import com.example.demo.repository.SubCategoryRepository;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private SubCategoryRepository subCategoryRepository;
 
     // include Logger(slf4j) for auditing purposes
     private static final Logger logger = LoggerFactory.getLogger(CategoryServiceImpl.class);
@@ -117,6 +121,12 @@ public class CategoryServiceImpl implements CategoryService {
             throw new IllegalArgumentException("Category is not found with id: " + id);
         }
 
+        // Check if any subcategories are associated with the category
+        boolean hasSubCategories = subCategoryRepository.existsByCategoryId(id);
+        if (hasSubCategories) {
+            throw new IllegalStateException("Cannot delete Category with associated SubCategories.");
+        }
+        
         categoryRepository.deleteById(id);
 
         logger.info("Category with id {} was deleted.", id);

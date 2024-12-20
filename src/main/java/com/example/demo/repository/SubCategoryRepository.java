@@ -20,4 +20,6 @@ public interface SubCategoryRepository extends JpaRepository<SubCategory, Long> 
     // We can add custom queries here.
 
     Optional<SubCategory> findBySubCategoryName(String subCategoryName);
+
+    boolean existsByCategoryId(long categoryId);
 }
