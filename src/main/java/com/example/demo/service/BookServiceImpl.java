@@ -76,11 +76,11 @@ public class BookServiceImpl implements BookService {
         dto.setSubCategory(subCategoryService.toSubCategoryResponseDTO(book.getSubCategory()));
         return dto;
     }
+
     // ----
     // ****
-
     // Helper class to validate book save/update request
-    private void validateBookSaveRequest(BookRequestDTO bookSaveRequestDTO) {
+    private void validateBookSaveRequest(String requestType, BookRequestDTO bookSaveRequestDTO) {
         if (bookSaveRequestDTO.getTitle() == null || bookSaveRequestDTO.getTitle().isEmpty()) {
             throw new IllegalArgumentException("Book title is required.");
         }
@@ -93,8 +93,18 @@ public class BookServiceImpl implements BookService {
             throw new IllegalArgumentException("QOH must be a positive value.");
         }
 
-        if (bookSaveRequestDTO.getCoverImage() != null && bookSaveRequestDTO.getCoverImage().isEmpty()) {
-            throw new IllegalArgumentException("Cover image is invalid.");
+        // Check for cover image in "saveBook" requests
+        if (requestType.equals("saveBook")) {
+            // For saveBook requests, coverImage must be provided
+            if (bookSaveRequestDTO.getCoverImage() == null || bookSaveRequestDTO.getCoverImage().isEmpty()) {
+                throw new IllegalArgumentException("Cover image is required.");
+            }
+        } else if (requestType.equals("updateBook")) {
+            // For updateBook requests, coverImage can be null
+            // If coverImage is not null, check if it's valid (i.e., non-empty)
+            if (bookSaveRequestDTO.getCoverImage() != null && bookSaveRequestDTO.getCoverImage().isEmpty()) {
+                throw new IllegalArgumentException("Cover image is invalid.");
+            }
         }
     }
     // ---
@@ -118,7 +128,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookResponseDTO saveBook(BookRequestDTO bookSaveRequestDTO) {
-        validateBookSaveRequest(bookSaveRequestDTO); // validate requests
+        validateBookSaveRequest("saveBook", bookSaveRequestDTO); // validate requests
 
         // Get related author information of the book
         Author relatedAuthor = authorRepository.findById(bookSaveRequestDTO.getAuthorId()).orElseThrow(
@@ -153,7 +163,7 @@ public class BookServiceImpl implements BookService {
     @Override
     public BookResponseDTO updateBook(long id, BookRequestDTO bookSaveRequestDTO) {
 
-        validateBookSaveRequest(bookSaveRequestDTO); // validate requests
+        validateBookSaveRequest("updateBook", bookSaveRequestDTO); // validate requests
 
         // Get related author information of the book
         Author relatedAuthor = authorRepository.findById(bookSaveRequestDTO.getAuthorId()).orElseThrow(
