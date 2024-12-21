@@ -80,7 +80,7 @@ public class BookServiceImpl implements BookService {
     // ----
     // ****
     // Helper class to validate book save/update request
-    private void validateBookSaveRequest(String requestType, BookRequestDTO bookSaveRequestDTO) {
+    private void validateBookSaveRequest(BookRequestDTO bookSaveRequestDTO) {
         if (bookSaveRequestDTO.getTitle() == null || bookSaveRequestDTO.getTitle().isEmpty()) {
             throw new IllegalArgumentException("Book title is required.");
         }
@@ -93,18 +93,8 @@ public class BookServiceImpl implements BookService {
             throw new IllegalArgumentException("QOH must be a positive value.");
         }
 
-        if ("saveBook".equals(requestType)) {
-            // Cover image must be provided for saving a new book
-            if (bookSaveRequestDTO.getCoverImage() == null || bookSaveRequestDTO.getCoverImage().isEmpty()) {
-                throw new IllegalArgumentException("Cover image is required for saving a new book");
-            }
-        } else if ("updateBook".equals(requestType)) {
-            // For updating a book, cover image can be null or empty
-
-            // If provided, it should not be empty
-            if (bookSaveRequestDTO.getCoverImage() != null && bookSaveRequestDTO.getCoverImage().isEmpty()) {
-                throw new IllegalArgumentException("Provided cover image is invalid.");
-            }
+        if (bookSaveRequestDTO.getCoverImage() != null && bookSaveRequestDTO.getCoverImage().isEmpty()) {
+            throw new IllegalArgumentException("Cover image is invalid.");
         }
     }
     // ---
@@ -128,7 +118,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookResponseDTO saveBook(BookRequestDTO bookSaveRequestDTO) {
-        validateBookSaveRequest("saveBook", bookSaveRequestDTO); // validate requests
+        validateBookSaveRequest(bookSaveRequestDTO); // validate requests
 
         // Get related author information of the book
         Author relatedAuthor = authorRepository.findById(bookSaveRequestDTO.getAuthorId()).orElseThrow(
@@ -162,13 +152,8 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookResponseDTO updateBook(long id, BookRequestDTO bookSaveRequestDTO) {
-        
-        if (bookSaveRequestDTO.getCoverImage() == null || bookSaveRequestDTO.getCoverImage().isEmpty()) {
-            // If no cover image, proceed without it
-            bookSaveRequestDTO.setCoverImage(null);
-        }
 
-        validateBookSaveRequest("updateBook", bookSaveRequestDTO); // validate requests
+        validateBookSaveRequest(bookSaveRequestDTO); // validate requests
 
         // Get related author information of the book
         Author relatedAuthor = authorRepository.findById(bookSaveRequestDTO.getAuthorId()).orElseThrow(
@@ -179,7 +164,7 @@ public class BookServiceImpl implements BookService {
                 .orElseThrow(() -> new NoSuchElementException(
                         "Sub category is not found with id: " + bookSaveRequestDTO.getSubCategoryId()));
 
-        // Get existing book details
+        // Get existing book details               
         Book existingBook = bookRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Book is not found with id: " + id));
 
@@ -190,16 +175,11 @@ public class BookServiceImpl implements BookService {
             existingBook.setAuthor(relatedAuthor);
             existingBook.setSubCategory(relatedSubCategory);
 
-            // Handle cover image update (only if a new file is provided)
+            // Handle cover image update
             if (bookSaveRequestDTO.getCoverImage() != null && !bookSaveRequestDTO.getCoverImage().isEmpty()) {
-                // If there's an existing image, delete it from the file system
-                if (existingBook.getCoverImage() != null && !existingBook.getCoverImage().isEmpty()) {
-                    fileUploadConfig.deleteOldCoverImage(existingBook.getCoverImage());
-                }
-
-                // Validate and save the new file
-                String newCoverImagePath = fileUploadConfig.saveFile(bookSaveRequestDTO.getCoverImage());
-                existingBook.setCoverImage(newCoverImagePath);
+                // Validate and save the uploaded file
+                String coverImagePath = fileUploadConfig.saveFile(bookSaveRequestDTO.getCoverImage());
+                existingBook.setCoverImage(coverImagePath);
             }
 
             return toBookResponseDTO(bookRepository.save(existingBook));
