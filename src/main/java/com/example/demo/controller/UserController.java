@@ -17,6 +17,13 @@ import com.example.demo.service.UserService;
 
 @RestController
 @RequestMapping("/user") // set table name
+/*
+ * It allows you to specify which external origins (i.e., domains or URLs) are
+ * permitted to make requests to your API. This is useful when your frontend
+ * application (running on a different server or port) needs to interact with
+ * your backend
+ */
+@CrossOrigin(origins = "*")
 public class UserController {
 
     @Autowired
@@ -97,4 +104,63 @@ public class UserController {
         }
     }
     // ---
+
+    // get all staff - this is alloacted for Admin role
+    @GetMapping("/staff")
+    public ResponseEntity<List<UserResponseDTO>> getAllStaffMembers() {
+        List<UserResponseDTO> users = userService.getAllStaffMembers();
+
+        if (users.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(users);
+    }
+    //----
+
+    // get staff by id - this is alloacted for Admin role
+    @GetMapping("/staff/{id}")
+    public ResponseEntity<UserResponseDTO> getStaffMemberById(@PathVariable long id) {
+        try {
+            UserResponseDTO user = userService.getStaffMemberById(id);
+            return ResponseEntity.status(HttpStatus.OK).body(user);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+    //----
+
+    // get update staff - this is alloacted for Admin role
+    @PutMapping("/staff/{id}")
+    public ResponseEntity<Object> updateStaffMember(@PathVariable long id, @RequestBody UserStaffRegistrationRequestDTO userStaffRegistrationRequestDTO) {
+        try {
+            UserResponseDTO updatedUser = userService.updateStaffMember(id, userStaffRegistrationRequestDTO);
+            return ResponseEntity.status(HttpStatus.OK).body(updatedUser);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User is not found");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
+        }
+    }
+    //---
+
+    // get delete staff - this is alloacted for Admin role
+    @DeleteMapping("/staff/{id}")
+    public ResponseEntity<Object> deleteStaffMember(@PathVariable long id) {
+        try {
+            userService.deleteStaffMember(id);
+            return ResponseEntity.status(HttpStatus.OK).build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
+        }catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Staff member is not found");
+        }catch(Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
+        }
+    }
+    //----
 }

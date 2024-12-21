@@ -20,12 +20,17 @@ public interface UserService {
     UserResponseDTO getUserById(long id);
     UserResponseDTO updateUserProfile(long id, UserRequestDTO userRequestDTO);
     void deleteUser(long id);  
-    UserResponseDTO addStaff(UserStaffRegistrationRequestDTO userStaffRegistrationRequestDTO);
-
 
     //for AuthController
     boolean isPasswordReset(Long id, UserPaswordResetRequestDTO userPaswordResetRequestDTO);
     UserResponseDTO addCustomer(CustomerRegistrationDTO customerRegistrationDTO);
     JwtResponseDTO loginUser(UserLoginRequestDTO loginRequest);
     UserResponseDTO getUserByUsername(UserFindRequestDTO userFindRequestDTO);
+
+    //for stff allocation : by admin
+    UserResponseDTO addStaff(UserStaffRegistrationRequestDTO userStaffRegistrationRequestDTO);
+    List<UserResponseDTO> getAllStaffMembers();
+    UserResponseDTO getStaffMemberById(long id);
+    UserResponseDTO updateStaffMember(long id, UserStaffRegistrationRequestDTO userStaffRegistrationDTO);
+    void deleteStaffMember(long id);  
 }

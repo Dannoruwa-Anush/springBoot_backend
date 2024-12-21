@@ -1,5 +1,6 @@
 package com.example.demo.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -38,4 +39,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "LEFT JOIN FETCH r.userPermissions " +
             "WHERE u.username = :username")
     Optional<User> findByUsernameWithRolesAndPermissions(@Param("username") String username);
+
+    // 5. get all users where role NOT IN CUSTOMER & ADMIN
+    @Query("SELECT u FROM User u " +
+            "JOIN u.roles r " +
+            "WHERE r.roleName NOT IN ('CUSTOMER', 'ADMIN')")
+    List<User> getAllStaffMembers();
+
 }

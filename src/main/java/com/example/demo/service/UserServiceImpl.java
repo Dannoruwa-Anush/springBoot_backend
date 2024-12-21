@@ -285,4 +285,84 @@ public class UserServiceImpl implements UserService {
       return toUserResponseDTO(user);
    }
    // ---
+
+   // for stff allocation : by admin
+   @Override
+   public List<UserResponseDTO> getAllStaffMembers() {
+      List<User> users = userRepository.getAllStaffMembers();
+      List<UserResponseDTO> userResponseDTOs = users.stream().map(this::toUserResponseDTO).collect(Collectors.toList());
+      return userResponseDTOs;
+   }
+
+   @Override
+   public UserResponseDTO getStaffMemberById(long id) {
+      // This is identical to getUserById
+      User user = userRepository.findById(id).orElseThrow(() -> new NoSuchElementException("User is not found" + id));
+      return toUserResponseDTO(user);
+   }
+
+   @Override
+   public UserResponseDTO updateStaffMember(long id, UserStaffRegistrationRequestDTO userStaffRegistrationDTO) {
+      if (userRepository.existsByUsername(userStaffRegistrationDTO.getUsername())) {
+         throw new IllegalArgumentException(
+               "The username '" + userStaffRegistrationDTO.getUsername() + "' is already taken.");
+      }
+
+      if (userRepository.existsByEmail(userStaffRegistrationDTO.getEmail())) {
+         throw new IllegalArgumentException(
+               "The email '" + userStaffRegistrationDTO.getEmail() + "' is already in use.");
+      }
+
+      // get existing staff member(user) by id
+      User existingStaffMember = userRepository.findById(id)
+            .orElseThrow(() -> new NoSuchElementException("User is not found" + id));
+
+      // Update existing staff member
+      existingStaffMember.setUsername(userStaffRegistrationDTO.getUsername());
+      existingStaffMember.setAddress(userStaffRegistrationDTO.getAddress());
+      existingStaffMember.setTelephoneNumber(userStaffRegistrationDTO.getTelephoneNumber());
+      existingStaffMember.setEmail(userStaffRegistrationDTO.getEmail());
+
+      // Update with requested roles for existing staff member
+      // Fetch the requested roles
+      Set<Role> requestedRole = new HashSet<>(
+            roleRepository.findAllById(userStaffRegistrationDTO.getExpectingRoleIds()));
+
+      // 1. Add new roles from the request
+      requestedRole.forEach(role -> {
+         if (!existingStaffMember.getRoles().contains(role)) {
+
+            // Validate roles
+            if (RoleName.ADMIN.getRoleName().equals(role.getRoleName())
+                  || RoleName.CUSTOMER.getRoleName().equals(role.getRoleName())) {
+               throw new IllegalArgumentException("Unauthorized role assignment: '" + role.getRoleName() + "'.");
+            }
+
+            existingStaffMember.getRoles().add(role);
+         }
+      });
+
+      // 2. Remove roles not in the request
+      existingStaffMember.getRoles().removeIf(role -> !requestedRole.contains(role));
+
+      userRepository.save(existingStaffMember);
+      return toUserResponseDTO(existingStaffMember);
+   }
+
+   @Override
+   public void deleteStaffMember(long id) {
+      //This is identical to delete user
+      if (!userRepository.existsById(id)) {
+         throw new IllegalArgumentException("Staff member is not found with id: " + id);
+      }
+
+      // Check if any Orders are associated with the user
+      boolean hasOrders = orderRepository.existsByUserId(id);
+      if (hasOrders) {
+         throw new IllegalStateException("Cannot delete staff member with associated Orders.");
+      }
+
+      userRepository.deleteById(id);
+      logger.info("Staff member with id {} was deleted.", id);
+   }
 }
