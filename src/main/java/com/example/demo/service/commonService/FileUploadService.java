@@ -14,6 +14,7 @@ public class FileUploadService {
 
     private String uploadDirectory = "D:\\\\netCentricProjectImageUploads";
 
+    //Helper method to ensure the upload directory exists
     public FileUploadService() throws IOException {
         // Ensure the upload directory exists
         Path uploadPath = Paths.get(uploadDirectory);
@@ -23,8 +24,7 @@ public class FileUploadService {
     }
     // ---
 
-    // Helper methods
-    // Validate the uploaded file for size and type
+    // Helper method to validate the uploaded file for size and type
     private void validateFile(MultipartFile file) {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("Uploaded file is empty.");
@@ -44,7 +44,7 @@ public class FileUploadService {
     }
     // ---
 
-    // Extract the file extension from the file name.
+    // Helper method to extract the file extension from the file name.
     private String getFileExtension(String fileName) {
         if (fileName == null || !fileName.contains(".")) {
             return "";
@@ -52,6 +52,19 @@ public class FileUploadService {
         return fileName.substring(fileName.lastIndexOf("."));
     }
     // ---
+
+    // Helper method to delete the old cover image from the file system
+    public void deleteOldCoverImage(String oldCoverImagePath) {
+        Path oldImagePath = Paths.get(uploadDirectory, oldCoverImagePath);
+
+        try {
+            Files.deleteIfExists(oldImagePath);
+        } catch (IOException e) {
+            // Log the error, but don't interrupt the update process.
+            System.err.println("Failed to delete old cover image: " + e.getMessage());
+        }
+    }
+    //----
 
     // Save the uploaded file and return its file path
     public String saveFile(MultipartFile file) throws IOException {

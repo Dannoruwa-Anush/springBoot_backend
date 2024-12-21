@@ -62,10 +62,10 @@ public class BookServiceImpl implements BookService {
 
         return dto;
     }
-    //-----
+    // -----
 
-    //----
-    private BooKGetByIdResponseDTO toBooKGetByIdresponseDTO(Book book){
+    // ----
+    private BooKGetByIdResponseDTO toBooKGetByIdresponseDTO(Book book) {
         BooKGetByIdResponseDTO dto = new BooKGetByIdResponseDTO();
         dto.setId(book.getId());
         dto.setTitle(book.getTitle());
@@ -76,7 +76,7 @@ public class BookServiceImpl implements BookService {
         dto.setSubCategory(subCategoryService.toSubCategoryResponseDTO(book.getSubCategory()));
         return dto;
     }
-    //----
+    // ----
     // ****
 
     // Helper class to validate book save/update request
@@ -164,7 +164,7 @@ public class BookServiceImpl implements BookService {
                 .orElseThrow(() -> new NoSuchElementException(
                         "Sub category is not found with id: " + bookSaveRequestDTO.getSubCategoryId()));
 
-        // Get existing book details               
+        // Get existing book details
         Book existingBook = bookRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Book is not found with id: " + id));
 
@@ -175,11 +175,16 @@ public class BookServiceImpl implements BookService {
             existingBook.setAuthor(relatedAuthor);
             existingBook.setSubCategory(relatedSubCategory);
 
-            // Handle cover image update
+            // Handle cover image update (only if a new file is provided)
             if (bookSaveRequestDTO.getCoverImage() != null && !bookSaveRequestDTO.getCoverImage().isEmpty()) {
-                // Validate and save the uploaded file
-                String coverImagePath = fileUploadConfig.saveFile(bookSaveRequestDTO.getCoverImage());
-                existingBook.setCoverImage(coverImagePath);
+                // If there's an existing image, delete it from the file system
+                if (existingBook.getCoverImage() != null && !existingBook.getCoverImage().isEmpty()) {
+                    fileUploadConfig.deleteOldCoverImage(existingBook.getCoverImage());
+                }
+
+                // Validate and save the new file
+                String newCoverImagePath = fileUploadConfig.saveFile(bookSaveRequestDTO.getCoverImage());
+                existingBook.setCoverImage(newCoverImagePath);
             }
 
             return toBookResponseDTO(bookRepository.save(existingBook));
@@ -218,7 +223,7 @@ public class BookServiceImpl implements BookService {
     @Override
     public List<BookResponseDTO> getAllBooksByAuthorId(Long inputAuthorId) {
         List<Book> books = bookRepository.findAllBooksByAuthorId(inputAuthorId);
-        List<BookResponseDTO> bookDTOs = books.stream().map(this::toBookResponseDTO).collect(Collectors.toList());       
+        List<BookResponseDTO> bookDTOs = books.stream().map(this::toBookResponseDTO).collect(Collectors.toList());
         return bookDTOs;
     }
     // ---
