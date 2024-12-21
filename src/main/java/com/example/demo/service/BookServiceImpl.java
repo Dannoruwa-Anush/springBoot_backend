@@ -93,17 +93,17 @@ public class BookServiceImpl implements BookService {
             throw new IllegalArgumentException("QOH must be a positive value.");
         }
 
-        // Check for cover image in "saveBook" requests
-        if (requestType.equals("saveBook")) {
-            // For saveBook requests, coverImage must be provided
+        if ("saveBook".equals(requestType)) {
+            // Cover image must be provided for saving a new book
             if (bookSaveRequestDTO.getCoverImage() == null || bookSaveRequestDTO.getCoverImage().isEmpty()) {
-                throw new IllegalArgumentException("Cover image is required.");
+                throw new IllegalArgumentException("Cover image is required for saving a new book");
             }
-        } else if (requestType.equals("updateBook")) {
-            // For updateBook requests, coverImage can be null
-            // If coverImage is not null, check if it's valid (i.e., non-empty)
+        } else if ("updateBook".equals(requestType)) {
+            // For updating a book, cover image can be null or empty
+
+            // If provided, it should not be empty
             if (bookSaveRequestDTO.getCoverImage() != null && bookSaveRequestDTO.getCoverImage().isEmpty()) {
-                throw new IllegalArgumentException("Cover image is invalid.");
+                throw new IllegalArgumentException("Provided cover image is invalid.");
             }
         }
     }
@@ -162,6 +162,11 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookResponseDTO updateBook(long id, BookRequestDTO bookSaveRequestDTO) {
+        
+        if (bookSaveRequestDTO.getCoverImage() == null || bookSaveRequestDTO.getCoverImage().isEmpty()) {
+            // If no cover image, proceed without it
+            bookSaveRequestDTO.setCoverImage(null);
+        }
 
         validateBookSaveRequest("updateBook", bookSaveRequestDTO); // validate requests
 
