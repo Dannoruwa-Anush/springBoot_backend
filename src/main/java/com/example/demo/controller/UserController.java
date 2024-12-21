@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.*;
 import com.example.demo.common.customHttpResponse.CustomErrorResponse;
 import com.example.demo.dto.request.UserRequestDTO;
 import com.example.demo.dto.request.UserStaffRegistrationRequestDTO;
+import com.example.demo.dto.request.StaffUserRequestDTO;
 import com.example.demo.dto.response.UserResponseDTO;
+import com.example.demo.dto.response.getById.StaffGetByIdResponseDTO;
 import com.example.demo.service.UserService;
 
 @RestController
@@ -120,9 +122,9 @@ public class UserController {
 
     // get staff by id - this is alloacted for Admin role
     @GetMapping("/staff/{id}")
-    public ResponseEntity<UserResponseDTO> getStaffMemberById(@PathVariable long id) {
+    public ResponseEntity<StaffGetByIdResponseDTO> getStaffMemberById(@PathVariable long id) {
         try {
-            UserResponseDTO user = userService.getStaffMemberById(id);
+            StaffGetByIdResponseDTO user = userService.getStaffMemberById(id);
             return ResponseEntity.status(HttpStatus.OK).body(user);
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -134,9 +136,9 @@ public class UserController {
 
     // get update staff - this is alloacted for Admin role
     @PutMapping("/staff/{id}")
-    public ResponseEntity<Object> updateStaffMember(@PathVariable long id, @RequestBody UserStaffRegistrationRequestDTO userStaffRegistrationRequestDTO) {
+    public ResponseEntity<Object> updateStaffMember(@PathVariable long id, @RequestBody StaffUserRequestDTO userUpdateRequestDTO) {
         try {
-            UserResponseDTO updatedUser = userService.updateStaffMember(id, userStaffRegistrationRequestDTO);
+            UserResponseDTO updatedUser = userService.updateStaffMember(id, userUpdateRequestDTO);
             return ResponseEntity.status(HttpStatus.OK).body(updatedUser);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));

@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -24,8 +25,11 @@ import com.example.demo.dto.request.UserLoginRequestDTO;
 import com.example.demo.dto.request.UserPaswordResetRequestDTO;
 import com.example.demo.dto.request.UserRequestDTO;
 import com.example.demo.dto.request.UserStaffRegistrationRequestDTO;
+import com.example.demo.dto.request.StaffUserRequestDTO;
 import com.example.demo.dto.response.JwtResponseDTO;
 import com.example.demo.dto.response.UserResponseDTO;
+import com.example.demo.dto.response.UserRoleResponseDTO;
+import com.example.demo.dto.response.getById.StaffGetByIdResponseDTO;
 import com.example.demo.entity.Role;
 import com.example.demo.entity.User;
 import com.example.demo.repository.OrderRepository;
@@ -70,6 +74,38 @@ public class UserServiceImpl implements UserService {
 
       return dto;
    }
+   //---
+
+   //---
+   private List<UserRoleResponseDTO> toRoleResponseDTO(Set<Role> roles){
+      List<UserRoleResponseDTO> listDTOs = new ArrayList<>();
+
+      for(Role role :roles){
+         UserRoleResponseDTO dto = new UserRoleResponseDTO();
+         dto.setId(role.getId());
+         dto.setRoleName(role.getRoleName());
+
+         listDTOs.add(dto);
+      }
+
+      return listDTOs;
+   }
+   //---
+
+   private StaffGetByIdResponseDTO toStaffGetByIdResponseDTO(User user) {
+      StaffGetByIdResponseDTO dto = new StaffGetByIdResponseDTO();
+      dto.setId(user.getId());
+      dto.setUsername(user.getUsername());
+      dto.setEmail(user.getEmail());
+      dto.setAddress(user.getAddress());
+      dto.setTelephoneNumber(user.getTelephoneNumber());
+      
+      List<UserRoleResponseDTO> userRoleNames = toRoleResponseDTO(user.getRoles());
+
+      dto.setRoles(userRoleNames);
+
+      return dto;
+   }
    // ***
 
    // ---
@@ -97,10 +133,8 @@ public class UserServiceImpl implements UserService {
             .orElseThrow(() -> new NoSuchElementException("User is not found" + id));
 
       // change existing user according to our requirement
-      existingUser.setUsername(userRequestDTO.getUsername());
       existingUser.setAddress(userRequestDTO.getAddress());
       existingUser.setTelephoneNumber(userRequestDTO.getTelephoneNumber());
-      existingUser.setEmail(userRequestDTO.getEmail());
       // Role update is not allowed for any user.
 
       return toUserResponseDTO(userRepository.save(existingUser));
@@ -295,38 +329,27 @@ public class UserServiceImpl implements UserService {
    }
 
    @Override
-   public UserResponseDTO getStaffMemberById(long id) {
+   public StaffGetByIdResponseDTO getStaffMemberById(long id) {
       // This is identical to getUserById
       User user = userRepository.findById(id).orElseThrow(() -> new NoSuchElementException("User is not found" + id));
-      return toUserResponseDTO(user);
+      return toStaffGetByIdResponseDTO(user);
    }
 
    @Override
-   public UserResponseDTO updateStaffMember(long id, UserStaffRegistrationRequestDTO userStaffRegistrationDTO) {
-      if (userRepository.existsByUsername(userStaffRegistrationDTO.getUsername())) {
-         throw new IllegalArgumentException(
-               "The username '" + userStaffRegistrationDTO.getUsername() + "' is already taken.");
-      }
-
-      if (userRepository.existsByEmail(userStaffRegistrationDTO.getEmail())) {
-         throw new IllegalArgumentException(
-               "The email '" + userStaffRegistrationDTO.getEmail() + "' is already in use.");
-      }
+   public UserResponseDTO updateStaffMember(long id, StaffUserRequestDTO userUpdateRequestDTO) {
 
       // get existing staff member(user) by id
       User existingStaffMember = userRepository.findById(id)
             .orElseThrow(() -> new NoSuchElementException("User is not found" + id));
 
       // Update existing staff member
-      existingStaffMember.setUsername(userStaffRegistrationDTO.getUsername());
-      existingStaffMember.setAddress(userStaffRegistrationDTO.getAddress());
-      existingStaffMember.setTelephoneNumber(userStaffRegistrationDTO.getTelephoneNumber());
-      existingStaffMember.setEmail(userStaffRegistrationDTO.getEmail());
+      existingStaffMember.setAddress(userUpdateRequestDTO.getAddress());
+      existingStaffMember.setTelephoneNumber(userUpdateRequestDTO.getTelephoneNumber());
 
       // Update with requested roles for existing staff member
       // Fetch the requested roles
       Set<Role> requestedRole = new HashSet<>(
-            roleRepository.findAllById(userStaffRegistrationDTO.getExpectingRoleIds()));
+            roleRepository.findAllById(userUpdateRequestDTO.getExpectingRoleIds()));
 
       // 1. Add new roles from the request
       requestedRole.forEach(role -> {

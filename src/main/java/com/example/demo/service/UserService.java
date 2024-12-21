@@ -10,15 +10,17 @@ import com.example.demo.dto.request.UserLoginRequestDTO;
 import com.example.demo.dto.request.UserPaswordResetRequestDTO;
 import com.example.demo.dto.request.UserRequestDTO;
 import com.example.demo.dto.request.UserStaffRegistrationRequestDTO;
+import com.example.demo.dto.request.StaffUserRequestDTO;
 import com.example.demo.dto.response.JwtResponseDTO;
 import com.example.demo.dto.response.UserResponseDTO;
+import com.example.demo.dto.response.getById.StaffGetByIdResponseDTO;
 
 @Service
 public interface UserService {
     
     List<UserResponseDTO> getAllUsers();
     UserResponseDTO getUserById(long id);
-    UserResponseDTO updateUserProfile(long id, UserRequestDTO userRequestDTO);
+    UserResponseDTO updateUserProfile(long id, UserRequestDTO usrRequestDTO);
     void deleteUser(long id);  
 
     //for AuthController
@@ -30,7 +32,7 @@ public interface UserService {
     //for stff allocation : by admin
     UserResponseDTO addStaff(UserStaffRegistrationRequestDTO userStaffRegistrationRequestDTO);
     List<UserResponseDTO> getAllStaffMembers();
-    UserResponseDTO getStaffMemberById(long id);
-    UserResponseDTO updateStaffMember(long id, UserStaffRegistrationRequestDTO userStaffRegistrationDTO);
+    StaffGetByIdResponseDTO getStaffMemberById(long id);
+    UserResponseDTO updateStaffMember(long id, StaffUserRequestDTO userUpdateRequestDTO);
     void deleteStaffMember(long id);  
 }
