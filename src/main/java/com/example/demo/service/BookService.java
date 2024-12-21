@@ -4,7 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.example.demo.dto.request.BookRequestDTO;
+import com.example.demo.dto.request.BookWithCoverImageRequestDTO;
+import com.example.demo.dto.request.BookWithOutCoverImageRequestDTO;
 import com.example.demo.dto.response.BookResponseDTO;
 import com.example.demo.dto.response.getById.BooKGetByIdResponseDTO;
 
@@ -15,9 +16,9 @@ public interface BookService {
 
     BooKGetByIdResponseDTO getBookById(long id);
 
-    BookResponseDTO saveBook(BookRequestDTO bookSaveRequestDTO);
+    BookResponseDTO saveBook(BookWithCoverImageRequestDTO bookSaveRequestDTO);
 
-    BookResponseDTO updateBook(long id, BookRequestDTO bookSaveRequestDTO);
+    BookResponseDTO updateBookWithCoverImage(long id, BookWithCoverImageRequestDTO bookSaveRequestDTO);
 
     void deleteBook(long id);
 
@@ -26,4 +27,6 @@ public interface BookService {
     List<BookResponseDTO> getAllBooksByAuthorId(Long inputAuthorId);
 
     List<BookResponseDTO> getAllBooksByCategoryId(Long inputCategoryId);
+
+    BookResponseDTO updateBookWithOutCoverImage(long id, BookWithOutCoverImageRequestDTO bookSaveRequestDTO);
 }

@@ -10,7 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.dto.request.BookRequestDTO;
+import com.example.demo.dto.request.BookWithCoverImageRequestDTO;
+import com.example.demo.dto.request.BookWithOutCoverImageRequestDTO;
 import com.example.demo.dto.response.BookResponseDTO;
 import com.example.demo.dto.response.getById.BooKGetByIdResponseDTO;
 import com.example.demo.entity.Author;
@@ -80,7 +81,7 @@ public class BookServiceImpl implements BookService {
     // ----
     // ****
     // Helper class to validate book save/update request
-    private void validateBookSaveRequest(BookRequestDTO bookSaveRequestDTO) {
+    private void validateBookWithCoverImageSaveRequest(BookWithCoverImageRequestDTO bookSaveRequestDTO) {
         if (bookSaveRequestDTO.getTitle() == null || bookSaveRequestDTO.getTitle().isEmpty()) {
             throw new IllegalArgumentException("Book title is required.");
         }
@@ -95,6 +96,20 @@ public class BookServiceImpl implements BookService {
 
         if (bookSaveRequestDTO.getCoverImage() != null && bookSaveRequestDTO.getCoverImage().isEmpty()) {
             throw new IllegalArgumentException("Cover image is invalid.");
+        }
+    }
+    // ----
+    private void validateBookWithOutCoverImageSaveRequest(BookWithOutCoverImageRequestDTO bookSaveRequestDTO) {
+        if (bookSaveRequestDTO.getTitle() == null || bookSaveRequestDTO.getTitle().isEmpty()) {
+            throw new IllegalArgumentException("Book title is required.");
+        }
+
+        if (bookSaveRequestDTO.getUnitPrice() < 0) {
+            throw new IllegalArgumentException("Unit price must be a positive value.");
+        }
+
+        if (bookSaveRequestDTO.getQoh() < 0) {
+            throw new IllegalArgumentException("QOH must be a positive value.");
         }
     }
     // ---
@@ -117,8 +132,8 @@ public class BookServiceImpl implements BookService {
     // ---
 
     @Override
-    public BookResponseDTO saveBook(BookRequestDTO bookSaveRequestDTO) {
-        validateBookSaveRequest(bookSaveRequestDTO); // validate requests
+    public BookResponseDTO saveBook(BookWithCoverImageRequestDTO bookSaveRequestDTO) {
+        validateBookWithCoverImageSaveRequest(bookSaveRequestDTO); // validate requests
 
         // Get related author information of the book
         Author relatedAuthor = authorRepository.findById(bookSaveRequestDTO.getAuthorId()).orElseThrow(
@@ -151,9 +166,9 @@ public class BookServiceImpl implements BookService {
     // ---
 
     @Override
-    public BookResponseDTO updateBook(long id, BookRequestDTO bookSaveRequestDTO) {
+    public BookResponseDTO updateBookWithCoverImage(long id, BookWithCoverImageRequestDTO bookSaveRequestDTO) {
 
-        validateBookSaveRequest(bookSaveRequestDTO); // validate requests
+        validateBookWithCoverImageSaveRequest(bookSaveRequestDTO); // validate requests
 
         // Get related author information of the book
         Author relatedAuthor = authorRepository.findById(bookSaveRequestDTO.getAuthorId()).orElseThrow(
@@ -230,4 +245,32 @@ public class BookServiceImpl implements BookService {
         return bookDTOs;
     }
     // ---
+
+    @Override
+    public BookResponseDTO updateBookWithOutCoverImage(long id, BookWithOutCoverImageRequestDTO bookSaveRequestDTO) {
+       
+        validateBookWithOutCoverImageSaveRequest(bookSaveRequestDTO); // validate requests
+
+        // Get related author information of the book
+        Author relatedAuthor = authorRepository.findById(bookSaveRequestDTO.getAuthorId()).orElseThrow(
+                () -> new NoSuchElementException("Author is not found with id: " + bookSaveRequestDTO.getAuthorId()));
+
+        // Get related subCategory information of the book
+        SubCategory relatedSubCategory = subCategoryRepository.findById(bookSaveRequestDTO.getSubCategoryId())
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Sub category is not found with id: " + bookSaveRequestDTO.getSubCategoryId()));
+
+        // Get existing book details               
+        Book existingBook = bookRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Book is not found with id: " + id));
+
+        existingBook.setTitle(bookSaveRequestDTO.getTitle());
+        existingBook.setUnitPrice(bookSaveRequestDTO.getUnitPrice());
+        existingBook.setQoh(bookSaveRequestDTO.getQoh());
+        existingBook.setAuthor(relatedAuthor);
+        existingBook.setSubCategory(relatedSubCategory);
+
+        return toBookResponseDTO(bookRepository.save(existingBook));
+    }
+    //----
 }

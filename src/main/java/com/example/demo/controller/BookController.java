@@ -13,10 +13,12 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.common.customHttpResponse.CustomErrorResponse;
-import com.example.demo.dto.request.BookRequestDTO;
+import com.example.demo.dto.request.BookWithCoverImageRequestDTO;
+import com.example.demo.dto.request.BookWithOutCoverImageRequestDTO;
 import com.example.demo.dto.response.BookResponseDTO;
 import com.example.demo.dto.response.getById.BooKGetByIdResponseDTO;
 import com.example.demo.service.BookService;
@@ -79,7 +81,7 @@ public class BookController {
      * parameters, and uploaded files (multipart data) to a single object.
      */
     @PostMapping("/book")
-    public ResponseEntity<Object> createBook(@ModelAttribute BookRequestDTO bookSaveRequestDTO) {
+    public ResponseEntity<Object> createBook(@ModelAttribute BookWithCoverImageRequestDTO bookSaveRequestDTO) {
         try {
             BookResponseDTO savedBook = bookService.saveBook(bookSaveRequestDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedBook);
@@ -98,11 +100,11 @@ public class BookController {
      * When using @ModelAttribute, the Spring framework binds form data, query
      * parameters, and uploaded files (multipart data) to a single object.
      */
-    @PutMapping("/book/{id}")
-    public ResponseEntity<Object> updateBook(@PathVariable Long id,
-            @ModelAttribute BookRequestDTO bookSaveRequestDTO) {
+    @PutMapping("/book/with-cover-image/{id}")
+    public ResponseEntity<Object> updateBookWithCoverImage(@PathVariable Long id,
+            @ModelAttribute BookWithCoverImageRequestDTO bookSaveRequestDTO) {
         try {
-            BookResponseDTO updatedBook = bookService.updateBook(id, bookSaveRequestDTO);
+            BookResponseDTO updatedBook = bookService.updateBookWithCoverImage(id, bookSaveRequestDTO);
             return ResponseEntity.status(HttpStatus.OK).body(updatedBook);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
@@ -162,6 +164,22 @@ public class BookController {
         }
 
         return ResponseEntity.status((HttpStatus.OK)).body(books);
+    }
+    // ---
+
+    @PutMapping("/book/without-cover-image/{id}")
+    public ResponseEntity<Object> updateBookWithOutCoverImage(@PathVariable Long id,
+            @RequestBody BookWithOutCoverImageRequestDTO bookSaveRequestDTO) {
+        try {
+            BookResponseDTO updatedBook = bookService.updateBookWithOutCoverImage(id, bookSaveRequestDTO);
+            return ResponseEntity.status(HttpStatus.OK).body(updatedBook);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
+        }
     }
     // ---
 }
