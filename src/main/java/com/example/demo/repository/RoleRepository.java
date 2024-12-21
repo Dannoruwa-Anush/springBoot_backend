@@ -1,8 +1,10 @@
 package com.example.demo.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.example.demo.entity.Role;
@@ -20,4 +22,7 @@ public interface RoleRepository extends JpaRepository<Role, Long> {
     // We can add custom queries here.
 
     Optional<Role> findByRoleName(String roleName);
+
+    @Query("SELECT r FROM Role r WHERE r.roleName NOT IN ('CUSTOMER', 'ADMIN')")
+    List<Role> getAllStaffRoles();
 }

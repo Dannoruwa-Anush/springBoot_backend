@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.request.RoleRequestDTO;
 import com.example.demo.dto.response.RoleResponseDTO;
+import com.example.demo.dto.response.StaffRoleResponseDTO;
 import com.example.demo.entity.Role;
 import com.example.demo.entity.UserPermission;
 import com.example.demo.repository.RoleRepository;
@@ -46,6 +47,16 @@ public class RoleServiceImpl implements RoleService {
         return responseDto;
     }
     // ---
+
+    //----
+    private StaffRoleResponseDTO toStaffRoleResponseDTO(Role role) {
+        StaffRoleResponseDTO dto = new StaffRoleResponseDTO();
+        dto.setId(role.getId());
+        dto.setRoleName(role.getRoleName());
+
+        return dto;
+    }
+    //----
     // ****
 
     @Override
@@ -144,4 +155,13 @@ public class RoleServiceImpl implements RoleService {
         logger.info("Role with id {} was deleted.", id);
     }
     // ---
+
+    @Override
+    public List<StaffRoleResponseDTO> getAllStaffRoles() {
+        List<Role> roles = roleRepository.getAllStaffRoles();
+        List<StaffRoleResponseDTO> roleDTOs = roles.stream().map(this::toStaffRoleResponseDTO)
+                .collect(Collectors.toList());
+        return roleDTOs;
+    }
+    //---
 }

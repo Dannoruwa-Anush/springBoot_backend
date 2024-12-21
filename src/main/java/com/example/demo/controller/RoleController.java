@@ -6,6 +6,7 @@ import java.util.NoSuchElementException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,10 +19,18 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.common.customHttpResponse.CustomErrorResponse;
 import com.example.demo.dto.request.RoleRequestDTO;
 import com.example.demo.dto.response.RoleResponseDTO;
+import com.example.demo.dto.response.StaffRoleResponseDTO;
 import com.example.demo.service.RoleService;
 
 @RestController
 @RequestMapping("role")
+/*
+ * It allows you to specify which external origins (i.e., domains or URLs) are
+ * permitted to make requests to your API. This is useful when your frontend
+ * application (running on a different server or port) needs to interact with
+ * your backend
+ */
+@CrossOrigin(origins = "*")
 public class RoleController {
 
     @Autowired
@@ -51,6 +60,7 @@ public class RoleController {
 
         return ResponseEntity.status(HttpStatus.OK).body(roles);
     }
+    //---
 
     @GetMapping("/{id}")
     public ResponseEntity<RoleResponseDTO> getRoleById(@PathVariable long id) {
@@ -63,6 +73,7 @@ public class RoleController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+    //---
 
     @PostMapping
     public ResponseEntity<Object> createRole(@RequestBody RoleRequestDTO roleRequestDTO) {
@@ -75,6 +86,7 @@ public class RoleController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
         }
     }
+    //---
 
     @PutMapping("/{id}")
     public ResponseEntity<Object> updateRole(@PathVariable long id, @RequestBody RoleRequestDTO roleRequestDTO) {
@@ -89,6 +101,7 @@ public class RoleController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
         }
     }
+    //---
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteRole(@PathVariable long id) {
@@ -103,4 +116,17 @@ public class RoleController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
         }
     }
+    //---
+
+    @GetMapping("/staff")
+    public ResponseEntity<List<StaffRoleResponseDTO>> getAllStaffRoles() {
+        List<StaffRoleResponseDTO> roles = roleService.getAllStaffRoles();
+
+        if(roles.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(roles);
+    }
+    //---
 }
