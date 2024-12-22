@@ -133,7 +133,7 @@ public class OrderController {
     }
     // ---
 
-    @GetMapping("/orderStatus")
+    @PostMapping("/orderStatus")
     public ResponseEntity<List<OrderResponseDTO>> getAllOrdersByOrderStatus(@RequestBody OrderByStatusRequestDTO orderByStatusRequestDTO) {
         List<OrderResponseDTO> orders = orderService.getAllOrdersByOrderStatus(orderByStatusRequestDTO);
 
@@ -145,7 +145,7 @@ public class OrderController {
     }
     // ---
 
-    @GetMapping("/orderDateAndStatus")
+    @PostMapping("/orderDateAndStatus")
     public ResponseEntity<List<OrderResponseDTO>> findAllOrdersByDateAndStatus(@RequestBody OrderByDateRequestDTO orderByDateRequestDTO) {
         List<OrderResponseDTO> orders = orderService.findAllOrdersByDateAndStatus(orderByDateRequestDTO);
 
