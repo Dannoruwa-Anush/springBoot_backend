@@ -5,7 +5,9 @@ import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,6 +29,7 @@ import com.example.demo.dto.response.ShoppingCartTotalResponseDTO;
 import com.example.demo.dto.request.OrderByDateRequestDTO;
 import com.example.demo.dto.request.OrderByStatusRequestDTO;
 import com.example.demo.service.OrderService;
+import com.example.demo.service.commonService.PdfFileGenerationService;
 
 @RestController
 @RequestMapping("order")
@@ -41,6 +44,9 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private PdfFileGenerationService pdfFileGenerationService;
 
     /*
      * ResponseEntity is a powerful class in Spring Boot for managing HTTP
@@ -194,4 +200,17 @@ public class OrderController {
         }
     }
     // ---
+
+    //GET Bill in PDF
+    @GetMapping("/{id}/pdfOrderBill")
+    public ResponseEntity<byte[]> getOrderBill(@PathVariable Long id){
+        OrderBillResponseDTO order = orderService.getOrderById(id);
+        byte[] pdfBytes = pdfFileGenerationService.generateOrderPdf(order);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=order-" + id + ".pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfBytes);
+    }
+    //----
 }

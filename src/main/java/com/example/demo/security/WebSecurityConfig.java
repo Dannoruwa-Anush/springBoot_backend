@@ -226,6 +226,10 @@ public class WebSecurityConfig {
                         
                         .requestMatchers(HttpMethod.PUT, "/order")
                         .hasAnyRole(RoleName.ADMIN.getRoleName())
+
+                        //get bill
+                        .requestMatchers(HttpMethod.GET, "/order/{id}/pdfOrderBill")
+                        .hasAnyRole(RoleName.ADMIN.getRoleName(), RoleName.MANAGER.getRoleName(), RoleName.CASHIER.getRoleName())
                         // *****
 
                         // Access is unauthenticated (for all)

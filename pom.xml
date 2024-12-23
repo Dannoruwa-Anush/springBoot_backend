@@ -61,7 +61,7 @@
 			<version>2.7.9</version>
 		</dependency>
 
-				<!-- [Start - jwt dependency] -->
+		<!-- [Start - jwt dependency] -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
@@ -85,6 +85,19 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
+
+		<!-- [Start : iText dependency] -->
+		<dependency>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>kernel</artifactId>
+			<version>7.2.6</version>
+		</dependency>
+		<dependency>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>layout</artifactId>
+			<version>7.2.6</version>
+		</dependency>
+		<!-- [End : iText dependency] -->
 	</dependencies>
 
 	<build>
