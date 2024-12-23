@@ -21,22 +21,22 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     // We can add custom queries here.
 
-    // 1. find all orders by user(customer) id
-    // SQL QUERY : SELECT * FROM orders WHERE user_id = inputUserId;
+    // 1. find all orders by user(customer) id (desending)
+    // SQL QUERY : SELECT * FROM orders WHERE user_id = inputUserId ORDER BY createdAt DESC;
     // JPQL query
-    @Query("SELECT o FROM Order o where o.user.id = :inputUserId")
+    @Query("SELECT o FROM Order o where o.user.id = :inputUserId ORDER BY o.createdAt DESC")
     List<Order> findAllOrdersByUserId(@Param("inputUserId") Long inputUserId);
 
-    // 2. find all orders by order status
-    // SQL QUERY : SELECT * FROM orders WHERE status = inputOrderStatus;
+    // 2. find all orders by order status (desending)
+    // SQL QUERY : SELECT * FROM orders WHERE status = inputOrderStatus ORDER BY createdAt DESC;
     // JPQL query
-    @Query("SELECT o FROM Order o where o.status = :inputOrderStatus")
+    @Query("SELECT o FROM Order o where o.status = :inputOrderStatus ORDER BY o.createdAt DESC")
     List<Order> findAllOrdersByOrderStatus(@Param("inputOrderStatus") OrderStatus inputOrderStatus);
 
-    // 3. find all orders by order place date (compare only the date part) and status
-    // SQL QUERY : SELECT * FROM orders WHERE createdAt = inputOrderPlacedDate AND status = inputOrderStatus;
+    // 3. find all orders by order place date (compare only the date part) and status (desending)
+    // SQL QUERY : SELECT * FROM orders WHERE createdAt = inputOrderPlacedDate AND status = inputOrderStatus ORDER BY createdAt DESC;
     // JPQL query
-    @Query("SELECT o FROM Order o WHERE FUNCTION('DATE', o.createdAt) = :inputOrderPlacedDate AND o.status = :inputOrderStatus")
+    @Query("SELECT o FROM Order o WHERE FUNCTION('DATE', o.createdAt) = :inputOrderPlacedDate AND o.status = :inputOrderStatus ORDER BY o.createdAt DESC")
     List<Order> findAllOrdersByDateAndStatus(@Param("inputOrderPlacedDate") LocalDate inputOrderPlacedDate, @Param("inputOrderStatus") OrderStatus inputOrderStatus);
 
     boolean existsByUserId(long userId);
