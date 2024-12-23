@@ -208,11 +208,21 @@ public class WebSecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/order/**")
                         .hasAnyRole(RoleName.ADMIN.getRoleName())
 
-                        .requestMatchers(HttpMethod.PUT, "/order/**")
-                        .hasAnyRole(RoleName.ADMIN.getRoleName())
-
-                        .requestMatchers(HttpMethod.POST, "/book/**")
+                        .requestMatchers(HttpMethod.POST, "/order/**")
                         .hasAnyRole(RoleName.CUSTOMER.getRoleName(), RoleName.CASHIER.getRoleName())
+
+                        /*For /order/updateOrderStatus
+                         * Aceess is restricted according to following rule
+                         * ADMIN        : can
+                         * MANAGER      : Can
+                         * Cashier      : Can't
+                         * Customer     : Can
+                         */
+                        .requestMatchers(HttpMethod.PUT, "/order/updateOrderStatus")
+                        .hasAnyRole(RoleName.ADMIN.getRoleName(), RoleName.MANAGER.getRoleName(), RoleName.CUSTOMER.getRoleName())
+                        
+                        .requestMatchers(HttpMethod.PUT, "/order")
+                        .hasAnyRole(RoleName.ADMIN.getRoleName())
                         // *****
 
                         // Access is unauthenticated (for all)
