@@ -60,8 +60,8 @@ public class OrderServiceImpl implements OrderService {
     }
     // ---
 
-    //---
-    private CustomerUserResponseDTO toCustomerUserResponseDTO(User user){
+    // ---
+    private CustomerUserResponseDTO toCustomerUserResponseDTO(User user) {
         CustomerUserResponseDTO customer = new CustomerUserResponseDTO();
         customer.setId(user.getId());
         customer.setUsername(user.getUsername());
@@ -70,20 +70,20 @@ public class OrderServiceImpl implements OrderService {
         customer.setTelephoneNumber(user.getTelephoneNumber());
         return customer;
     }
-    //---
+    // ---
 
-    //---
-     private BookInOrderResponseDTO toBookInOrderResponseDTO(Book book) {
+    // ---
+    private BookInOrderResponseDTO toBookInOrderResponseDTO(Book book) {
         BookInOrderResponseDTO bookDto = new BookInOrderResponseDTO();
         bookDto.setId(book.getId());
         bookDto.setTitle(book.getTitle());
         bookDto.setUnitPrice(book.getUnitPrice());
         return bookDto;
     }
-    //---
+    // ---
 
-    //---
-    private List<OrderBookResponseDTO> toListOrderBookResponseDTO (List<OrderBook> orderBooks){
+    // ---
+    private List<OrderBookResponseDTO> toListOrderBookResponseDTO(List<OrderBook> orderBooks) {
         List<OrderBookResponseDTO> listDTOs = new ArrayList<>();
 
         for (OrderBook orderBook : orderBooks) {
@@ -91,16 +91,16 @@ public class OrderServiceImpl implements OrderService {
             dto.setQuantity(orderBook.getQuantity());
             dto.setBook(toBookInOrderResponseDTO(orderBook.getBook()));
 
-            //calculate subTotal
+            // calculate subTotal
             double subTotal = orderBook.getQuantity() * orderBook.getBook().getUnitPrice();
             dto.setSubTotal(subTotal);
-            
+
             listDTOs.add(dto);
         }
-    
+
         return listDTOs;
     }
-    //---
+    // ---
 
     // ---
     private OrderBillResponseDTO toOrderBillResponseDTO(Order order) {
@@ -165,7 +165,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderBillResponseDTO getOrderById(long id) {
         Order order = orderRepository.findById(id)
-            .orElseThrow(() -> new NoSuchElementException("Order is not found with id: " + id));
+                .orElseThrow(() -> new NoSuchElementException("Order is not found with id: " + id));
 
         return toOrderBillResponseDTO(order);
     }
@@ -311,7 +311,19 @@ public class OrderServiceImpl implements OrderService {
     }
     // ---
 
+    /*
+     * @Transactional Annotation: Applied to both methods to define the transaction
+     * boundary.
+     * 
+     * Automatic Rollback: Any exception thrown during the execution of these
+     * methods will trigger a rollback.
+     * 
+     * Database Consistency: If an exception occurs (e.g., IllegalStateException),
+     * all changes made to the database within the method will be undone.
+     * 
+     */
     @Override
+    @Transactional
     public OrderResponseDTO updateOrderStatus(long id, OrderStatusUpdateRequestDTO orderStatusUpdateRequestDTO) {
 
         if (orderStatusUpdateRequestDTO.getNewStatus() == OrderStatus.PENDING) {
