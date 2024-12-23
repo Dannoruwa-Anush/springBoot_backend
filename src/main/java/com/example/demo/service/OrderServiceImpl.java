@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.common.projectEnum.OrderStatus;
@@ -231,47 +232,53 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public OrderResponseDTO updateOrder(long id, OrderRequestDTO orderRequestDTO) {
-        // Fetch existing order
-        Order existingOrder = orderRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Order not found with ID: " + id));
+        try {
+            // Fetch existing order
+            Order existingOrder = orderRepository.findById(id)
+                    .orElseThrow(() -> new NoSuchElementException("Order not found with ID: " + id));
 
-        // Check if the status of the order allows updates
-        if (existingOrder.getStatus() == OrderStatus.SHIPPED || existingOrder.getStatus() == OrderStatus.CANCELLED) {
-            throw new IllegalArgumentException("Cannot update a shipped or cancelled order.");
+            // Check if the status of the order allows updates
+            if (existingOrder.getStatus() == OrderStatus.SHIPPED
+                    || existingOrder.getStatus() == OrderStatus.CANCELLED) {
+                throw new IllegalArgumentException("Cannot update a shipped or cancelled order.");
+            }
+
+            // Adjust stock for books in the old order
+            for (OrderBook orderBook : existingOrder.getOrderBooks()) {
+                Book book = orderBook.getBook();
+                book.setQoh(book.getQoh() + orderBook.getQuantity()); // Return stock
+            }
+
+            // Prepare new orderBooks
+            List<OrderBook> newOrderBooks = prepareOrderBooks(orderRequestDTO.getBooks());
+
+            // Calculate total amount
+            double newTotalAmount = newOrderBooks.stream()
+                    .mapToDouble(orderBook -> orderBook.getBook().getUnitPrice() * orderBook.getQuantity())
+                    .sum();
+
+            // ********Update order details *********
+            existingOrder.setTotalAmount(newTotalAmount);
+
+            // set status to PENDING, when creating a new order
+            existingOrder.setStatus(OrderStatus.PENDING);
+
+            // Set the new books for the order
+            existingOrder.getOrderBooks().clear();
+            existingOrder.getOrderBooks().addAll(newOrderBooks);
+            // ****************************************
+
+            // Ensure bi-directional relationship
+            for (OrderBook orderBook : newOrderBooks) {
+                orderBook.setOrder(existingOrder);
+            }
+
+            // Save and return the updated order
+            return toOrderResponseDTO(orderRepository.save(existingOrder));
+
+        } catch (OptimisticLockingFailureException e) {
+            throw new RuntimeException("Concurrent modification detected, please try again.");
         }
-
-        // Adjust stock for books in the old order
-        for (OrderBook orderBook : existingOrder.getOrderBooks()) {
-            Book book = orderBook.getBook();
-            book.setQoh(book.getQoh() + orderBook.getQuantity()); // Return stock
-        }
-
-        // Prepare new orderBooks
-        List<OrderBook> newOrderBooks = prepareOrderBooks(orderRequestDTO.getBooks());
-
-        // Calculate total amount
-        double newTotalAmount = newOrderBooks.stream()
-                .mapToDouble(orderBook -> orderBook.getBook().getUnitPrice() * orderBook.getQuantity())
-                .sum();
-
-        // ********Update order details *********
-        existingOrder.setTotalAmount(newTotalAmount);
-
-        // set status to PENDING, when creating a new order
-        existingOrder.setStatus(OrderStatus.PENDING);
-
-        // Set the new books for the order
-        existingOrder.getOrderBooks().clear();
-        existingOrder.getOrderBooks().addAll(newOrderBooks);
-        // ****************************************
-
-        // Ensure bi-directional relationship
-        for (OrderBook orderBook : newOrderBooks) {
-            orderBook.setOrder(existingOrder);
-        }
-
-        // Save and return the updated order
-        return toOrderResponseDTO(orderRepository.save(existingOrder));
     }
     // ---
 
@@ -325,37 +332,41 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public OrderResponseDTO updateOrderStatus(long id, OrderStatusUpdateRequestDTO orderStatusUpdateRequestDTO) {
-
-        if (orderStatusUpdateRequestDTO.getNewStatus() == OrderStatus.PENDING) {
-            // Status is set to PENDING automatically, when creationg or saving an order.
-            throw new IllegalArgumentException("Cannot update the status to PENDING.");
-        }
-
-        // get the order details
-        Order existingOrder = orderRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Order not found with ID: " + id));
-
-        // Validate the current state and the new state
-        if (existingOrder.getStatus() == OrderStatus.CANCELLED) {
-            throw new IllegalArgumentException("Cannot update the status of a cancelled order.");
-        }
-
-        if (existingOrder.getStatus() == OrderStatus.DELIVERED
-                && orderStatusUpdateRequestDTO.getNewStatus() != OrderStatus.DELIVERED) {
-            throw new IllegalArgumentException("Cannot change the status of a delivered order.");
-        }
-
-        // Restore stock if transitioning to `CANCELLED`
-        if (orderStatusUpdateRequestDTO.getNewStatus() == OrderStatus.CANCELLED) {
-            for (OrderBook orderBook : existingOrder.getOrderBooks()) {
-                Book book = orderBook.getBook();
-                book.setQoh(book.getQoh() + orderBook.getQuantity());
+        try {
+            if (orderStatusUpdateRequestDTO.getNewStatus() == OrderStatus.PENDING) {
+                // Status is set to PENDING automatically, when creationg or saving an order.
+                throw new IllegalArgumentException("Cannot update the status to PENDING.");
             }
-        }
 
-        // Update status and save the order
-        existingOrder.setStatus(orderStatusUpdateRequestDTO.getNewStatus());
-        return toOrderResponseDTO(orderRepository.save(existingOrder));
+            // get the order details
+            Order existingOrder = orderRepository.findById(id)
+                    .orElseThrow(() -> new NoSuchElementException("Order not found with ID: " + id));
+
+            // Validate the current state and the new state
+            if (existingOrder.getStatus() == OrderStatus.CANCELLED) {
+                throw new IllegalArgumentException("Cannot update the status of a cancelled order.");
+            }
+
+            if (existingOrder.getStatus() == OrderStatus.DELIVERED
+                    && orderStatusUpdateRequestDTO.getNewStatus() != OrderStatus.DELIVERED) {
+                throw new IllegalArgumentException("Cannot change the status of a delivered order.");
+            }
+
+            // Restore stock if transitioning to `CANCELLED`
+            if (orderStatusUpdateRequestDTO.getNewStatus() == OrderStatus.CANCELLED) {
+                for (OrderBook orderBook : existingOrder.getOrderBooks()) {
+                    Book book = orderBook.getBook();
+                    book.setQoh(book.getQoh() + orderBook.getQuantity());
+                }
+            }
+
+            // Update status and save the order
+            existingOrder.setStatus(orderStatusUpdateRequestDTO.getNewStatus());
+            return toOrderResponseDTO(orderRepository.save(existingOrder));
+
+        } catch (OptimisticLockingFailureException e) {
+            throw new RuntimeException("Concurrent modification detected, please try again.");
+        }
     }
     // ----
 

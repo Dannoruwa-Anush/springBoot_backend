@@ -198,6 +198,9 @@ public class WebSecurityConfig {
                         // *****
 
                         //order
+                        ///order/getShoppingCartTotal : unauthenticated (for all)
+                        .requestMatchers(HttpMethod.POST, "/order/getShoppingCartTotal").permitAll()
+
                         /*For /order
                          * Aceess is restricted according to following rule
                          * ADMIN        : VIEW, UPDATE, DELETE
@@ -208,7 +211,7 @@ public class WebSecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/order/**")
                         .hasAnyRole(RoleName.ADMIN.getRoleName())
 
-                        .requestMatchers(HttpMethod.POST, "/order/**")
+                        .requestMatchers(HttpMethod.POST, "/order/")
                         .hasAnyRole(RoleName.CUSTOMER.getRoleName(), RoleName.CASHIER.getRoleName())
 
                         /*For /order/updateOrderStatus
@@ -232,7 +235,6 @@ public class WebSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/subCategory/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/author/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/book/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/order/getShoppingCartTotal").permitAll()
                         // *****
 
                         .anyRequest().authenticated()); // Authenticate all other requests

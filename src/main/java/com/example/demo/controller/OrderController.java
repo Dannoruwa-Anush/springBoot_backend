@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -102,6 +103,9 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order is not found");
+        } catch (OptimisticLockingFailureException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new CustomErrorResponse("Concurrent modification detected, please try again."));
         }
     }
     // ---
@@ -134,7 +138,8 @@ public class OrderController {
     // ---
 
     @PostMapping("/orderStatus")
-    public ResponseEntity<List<OrderResponseDTO>> getAllOrdersByOrderStatus(@RequestBody OrderByStatusRequestDTO orderByStatusRequestDTO) {
+    public ResponseEntity<List<OrderResponseDTO>> getAllOrdersByOrderStatus(
+            @RequestBody OrderByStatusRequestDTO orderByStatusRequestDTO) {
         List<OrderResponseDTO> orders = orderService.getAllOrdersByOrderStatus(orderByStatusRequestDTO);
 
         if (orders.isEmpty()) {
@@ -146,7 +151,8 @@ public class OrderController {
     // ---
 
     @PostMapping("/orderDateAndStatus")
-    public ResponseEntity<List<OrderResponseDTO>> findAllOrdersByDateAndStatus(@RequestBody OrderByDateRequestDTO orderByDateRequestDTO) {
+    public ResponseEntity<List<OrderResponseDTO>> findAllOrdersByDateAndStatus(
+            @RequestBody OrderByDateRequestDTO orderByDateRequestDTO) {
         List<OrderResponseDTO> orders = orderService.findAllOrdersByDateAndStatus(orderByDateRequestDTO);
 
         if (orders.isEmpty()) {
@@ -158,7 +164,8 @@ public class OrderController {
     // ---
 
     @PutMapping("/updateOrderStatus/{id}")
-    public ResponseEntity<Object> updateOrderStatus(@PathVariable long id, @RequestBody OrderStatusUpdateRequestDTO orderStatusUpdateRequestDTO) {
+    public ResponseEntity<Object> updateOrderStatus(@PathVariable long id,
+            @RequestBody OrderStatusUpdateRequestDTO orderStatusUpdateRequestDTO) {
         try {
             OrderResponseDTO updatedOrder = orderService.updateOrderStatus(id, orderStatusUpdateRequestDTO);
             return ResponseEntity.status(HttpStatus.OK).body(updatedOrder);
@@ -166,15 +173,19 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order is not found");
+        } catch (OptimisticLockingFailureException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new CustomErrorResponse("Concurrent modification detected, please try again."));
         }
     }
     // ---
 
-
     @PostMapping("/getShoppingCartTotal")
-    public ResponseEntity<Object> getShoppingCartTotal(@RequestBody ShoppingCartTotalRequestDTO ShoppingCartTotalRequestDTO) {
+    public ResponseEntity<Object> getShoppingCartTotal(
+            @RequestBody ShoppingCartTotalRequestDTO ShoppingCartTotalRequestDTO) {
         try {
-            ShoppingCartTotalResponseDTO calculatedTotal = orderService.calculateTotalAmount(ShoppingCartTotalRequestDTO);
+            ShoppingCartTotalResponseDTO calculatedTotal = orderService
+                    .calculateTotalAmount(ShoppingCartTotalRequestDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(calculatedTotal);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
@@ -182,5 +193,5 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
-    //---
+    // ---
 }
