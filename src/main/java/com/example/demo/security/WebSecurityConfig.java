@@ -130,7 +130,19 @@ public class WebSecurityConfig {
                         // Access is restricted to ADMIN
                         .requestMatchers("/userpermissions/**").hasRole(RoleName.ADMIN.getRoleName())
                         .requestMatchers("/role/**").hasRole(RoleName.ADMIN.getRoleName())
-                        .requestMatchers("/user/**").hasRole(RoleName.ADMIN.getRoleName())
+                        // *****
+                        
+                        //For /user
+                        /*
+                        * Aceess is restricted according to following rule
+                        * ADMIN        : VIEW, ADD, UPDATE, DELETE
+                        * MANAGER      : VIEW, UPDATE
+                        * Cashier      : VIEW, UPDATE
+                        * Customer     : VIEW, UPDATE
+                        */
+                        //DELETE and POST is restricted to ADMIN (i.e: user registration, login -> /auth)
+                        .requestMatchers(HttpMethod.DELETE, "/user/**").hasRole(RoleName.ADMIN.getRoleName())
+                        .requestMatchers(HttpMethod.POST, "/user/**").hasRole(RoleName.ADMIN.getRoleName())
                         // *****
 
                         /*For /category, /subCategory, /author, /book
@@ -150,6 +162,7 @@ public class WebSecurityConfig {
 
                         .requestMatchers(HttpMethod.POST, "/category/**")
                         .hasAnyRole(RoleName.ADMIN.getRoleName(), RoleName.MANAGER.getRoleName())
+                        // *****
 
                         //subCategory
                         .requestMatchers(HttpMethod.DELETE, "/subCategory/**")
@@ -160,6 +173,7 @@ public class WebSecurityConfig {
 
                         .requestMatchers(HttpMethod.POST, "/subCategory/**")
                         .hasAnyRole(RoleName.ADMIN.getRoleName(), RoleName.MANAGER.getRoleName())
+                        // *****
 
                         //author
                         .requestMatchers(HttpMethod.DELETE, "/author/**")
@@ -170,6 +184,7 @@ public class WebSecurityConfig {
 
                         .requestMatchers(HttpMethod.POST, "/author/**")
                         .hasAnyRole(RoleName.ADMIN.getRoleName(), RoleName.MANAGER.getRoleName())
+                        // *****
 
                         //book
                         .requestMatchers(HttpMethod.DELETE, "/book/**")
@@ -180,6 +195,7 @@ public class WebSecurityConfig {
 
                         .requestMatchers(HttpMethod.POST, "/book/**")
                         .hasAnyRole(RoleName.ADMIN.getRoleName(), RoleName.MANAGER.getRoleName())
+                        // *****
 
                         //order
                         /*For /order
@@ -197,6 +213,7 @@ public class WebSecurityConfig {
 
                         .requestMatchers(HttpMethod.POST, "/book/**")
                         .hasAnyRole(RoleName.CUSTOMER.getRoleName(), RoleName.CASHIER.getRoleName())
+                        // *****
 
                         // Access is unauthenticated (for all)
                         .requestMatchers("/auth/**").permitAll()
@@ -206,8 +223,10 @@ public class WebSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/author/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/book/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/order/getShoppingCartTotal").permitAll()
+                        // *****
 
                         .anyRequest().authenticated()); // Authenticate all other requests
+                        // *****
 
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
