@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.common.customHttpResponse.CustomErrorResponse;
@@ -26,7 +25,6 @@ import com.example.demo.dto.request.OrderByStatusRequestDTO;
 import com.example.demo.service.OrderService;
 
 @RestController
-@RequestMapping("order")
 /*
  * It allows you to specify which external origins (i.e., domains or URLs) are
  * permitted to make requests to your API. This is useful when your frontend
@@ -53,7 +51,7 @@ public class OrderController {
      * without any associated content in the response body.
      */
 
-    @GetMapping
+    @GetMapping("/order")
     public ResponseEntity<List<OrderResponseDTO>> getAllOrders() {
         List<OrderResponseDTO> orders = orderService.getAllOrders();
 
@@ -65,7 +63,7 @@ public class OrderController {
     }
     // ---
 
-    @GetMapping("/{id}")
+    @GetMapping("/order/{id}")
     public ResponseEntity<OrderBillResponseDTO> getAllOrderById(@PathVariable Long id) {
         try {
             OrderBillResponseDTO order = orderService.getOrderById(id);
@@ -78,7 +76,7 @@ public class OrderController {
     }
     // ---
 
-    @PostMapping
+    @PostMapping("/order")
     public ResponseEntity<Object> createOrder(@RequestBody OrderRequestDTO orderRequestDTO) {
         try {
             OrderResponseDTO savedOrder = orderService.saveOrder(orderRequestDTO);
@@ -91,7 +89,7 @@ public class OrderController {
     }
     // ---
 
-    @PutMapping("/{id}")
+    @PutMapping("/order/{id}")
     public ResponseEntity<Object> updateOrder(@PathVariable Long id, @RequestBody OrderRequestDTO orderRequestDTO) {
         try {
             OrderResponseDTO updatedOrder = orderService.updateOrder(id, orderRequestDTO);
@@ -107,7 +105,7 @@ public class OrderController {
     }
     // ---
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/order/{id}")
     public ResponseEntity<Object> deleteOrder(@PathVariable long id) {
         try {
             orderService.deleteOrder(id);
@@ -122,7 +120,7 @@ public class OrderController {
     }
     // ---
 
-    @GetMapping("/customer/{userId}")
+    @GetMapping("/order/customer/{userId}")
     public ResponseEntity<List<OrderResponseDTO>> getAllOrdersByUserId(@PathVariable Long userId) {
         List<OrderResponseDTO> orders = orderService.getAllOrdersByUserId(userId);
 
@@ -134,7 +132,7 @@ public class OrderController {
     }
     // ---
 
-    @PostMapping("/orderStatus")
+    @PostMapping("/order-Status")
     public ResponseEntity<List<OrderResponseDTO>> getAllOrdersByOrderStatus(
             @RequestBody OrderByStatusRequestDTO orderByStatusRequestDTO) {
         List<OrderResponseDTO> orders = orderService.getAllOrdersByOrderStatus(orderByStatusRequestDTO);
@@ -147,7 +145,7 @@ public class OrderController {
     }
     // ---
 
-    @PostMapping("/orderDateAndStatus")
+    @PostMapping("/order-Date-And-Status")
     public ResponseEntity<List<OrderResponseDTO>> findAllOrdersByDateAndStatus(
             @RequestBody OrderByDateRequestDTO orderByDateRequestDTO) {
         List<OrderResponseDTO> orders = orderService.findAllOrdersByDateAndStatus(orderByDateRequestDTO);

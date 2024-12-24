@@ -210,7 +210,7 @@ public class WebSecurityConfig {
                          */
                         .requestMatchers(HttpMethod.DELETE, "/order/**")
                         .hasAnyRole(RoleName.ADMIN.getRoleName())
-
+                        
                         .requestMatchers(HttpMethod.POST, "/order/**")
                         .hasAnyRole(RoleName.CUSTOMER.getRoleName(), RoleName.CASHIER.getRoleName())
 
