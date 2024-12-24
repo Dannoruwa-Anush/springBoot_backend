@@ -5,9 +5,7 @@ import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,15 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.common.customHttpResponse.CustomErrorResponse;
 import com.example.demo.dto.request.OrderRequestDTO;
-import com.example.demo.dto.request.OrderStatusUpdateRequestDTO;
-import com.example.demo.dto.request.ShoppingCartTotalRequestDTO;
 import com.example.demo.dto.response.OrderBillResponseDTO;
 import com.example.demo.dto.response.OrderResponseDTO;
-import com.example.demo.dto.response.ShoppingCartTotalResponseDTO;
 import com.example.demo.dto.request.OrderByDateRequestDTO;
 import com.example.demo.dto.request.OrderByStatusRequestDTO;
 import com.example.demo.service.OrderService;
-import com.example.demo.service.commonService.PdfFileGenerationService;
 
 @RestController
 @RequestMapping("order")
@@ -44,9 +38,6 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
-
-    @Autowired
-    private PdfFileGenerationService pdfFileGenerationService;
 
     /*
      * ResponseEntity is a powerful class in Spring Boot for managing HTTP
@@ -169,48 +160,5 @@ public class OrderController {
     }
     // ---
 
-    @PutMapping("/updateOrderStatus/{id}")
-    public ResponseEntity<Object> updateOrderStatus(@PathVariable long id,
-            @RequestBody OrderStatusUpdateRequestDTO orderStatusUpdateRequestDTO) {
-        try {
-            OrderResponseDTO updatedOrder = orderService.updateOrderStatus(id, orderStatusUpdateRequestDTO);
-            return ResponseEntity.status(HttpStatus.OK).body(updatedOrder);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order is not found");
-        } catch (OptimisticLockingFailureException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new CustomErrorResponse("Concurrent modification detected, please try again."));
-        }
-    }
-    // ---
 
-    @PostMapping("/getShoppingCartTotal")
-    public ResponseEntity<Object> getShoppingCartTotal(
-            @RequestBody ShoppingCartTotalRequestDTO ShoppingCartTotalRequestDTO) {
-        try {
-            ShoppingCartTotalResponseDTO calculatedTotal = orderService
-                    .calculateTotalAmount(ShoppingCartTotalRequestDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body(calculatedTotal);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomErrorResponse(e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
-    }
-    // ---
-
-    //GET Bill in PDF
-    @GetMapping("/{id}/pdfOrderBill")
-    public ResponseEntity<byte[]> getOrderBill(@PathVariable Long id){
-        OrderBillResponseDTO order = orderService.getOrderById(id);
-        byte[] pdfBytes = pdfFileGenerationService.generateOrderPdf(order);
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=order-" + id + ".pdf")
-                .contentType(MediaType.APPLICATION_PDF)
-                .body(pdfBytes);
-    }
-    //----
 }

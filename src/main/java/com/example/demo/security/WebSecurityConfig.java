@@ -131,29 +131,31 @@ public class WebSecurityConfig {
                         .requestMatchers("/userpermissions/**").hasRole(RoleName.ADMIN.getRoleName())
                         .requestMatchers("/role/**").hasRole(RoleName.ADMIN.getRoleName())
                         // *****
-                        
-                        //For /user
+
+                        // For /user
                         /*
-                        * Aceess is restricted according to following rule
-                        * ADMIN        : VIEW, ADD, UPDATE, DELETE
-                        * MANAGER      : VIEW, UPDATE
-                        * Cashier      : VIEW, UPDATE
-                        * Customer     : VIEW, UPDATE
-                        */
-                        //DELETE and POST is restricted to ADMIN (i.e: user registration, login -> /auth)
+                         * Aceess is restricted according to following rule
+                         * ADMIN : VIEW, ADD, UPDATE, DELETE
+                         * MANAGER : VIEW, UPDATE
+                         * Cashier : VIEW, UPDATE
+                         * Customer : VIEW, UPDATE
+                         */
+                        // DELETE and POST is restricted to ADMIN (i.e: user registration, login ->
+                        // /auth)
                         .requestMatchers(HttpMethod.DELETE, "/user/**").hasRole(RoleName.ADMIN.getRoleName())
                         .requestMatchers(HttpMethod.POST, "/user/**").hasRole(RoleName.ADMIN.getRoleName())
                         // *****
 
-                        /*For /category, /subCategory, /author, /book
+                        /*
+                         * For /category, /subCategory, /author, /book
                          * Aceess is restricted according to following rule
-                         * ADMIN        : VIEW, ADD, UPDATE, DELETE
-                         * MANAGER      : VIEW, ADD, UPDATE
-                         * Cashier      : VIEW
-                         * Customer     : VIEW
+                         * ADMIN : VIEW, ADD, UPDATE, DELETE
+                         * MANAGER : VIEW, ADD, UPDATE
+                         * Cashier : VIEW
+                         * Customer : VIEW
                          * without login: VIEW
                          */
-                        //category
+                        // category
                         .requestMatchers(HttpMethod.DELETE, "/category/**")
                         .hasAnyRole(RoleName.ADMIN.getRoleName())
 
@@ -164,7 +166,7 @@ public class WebSecurityConfig {
                         .hasAnyRole(RoleName.ADMIN.getRoleName(), RoleName.MANAGER.getRoleName())
                         // *****
 
-                        //subCategory
+                        // subCategory
                         .requestMatchers(HttpMethod.DELETE, "/subCategory/**")
                         .hasAnyRole(RoleName.ADMIN.getRoleName())
 
@@ -175,7 +177,7 @@ public class WebSecurityConfig {
                         .hasAnyRole(RoleName.ADMIN.getRoleName(), RoleName.MANAGER.getRoleName())
                         // *****
 
-                        //author
+                        // author
                         .requestMatchers(HttpMethod.DELETE, "/author/**")
                         .hasAnyRole(RoleName.ADMIN.getRoleName())
 
@@ -186,7 +188,7 @@ public class WebSecurityConfig {
                         .hasAnyRole(RoleName.ADMIN.getRoleName(), RoleName.MANAGER.getRoleName())
                         // *****
 
-                        //book
+                        // book
                         .requestMatchers(HttpMethod.DELETE, "/book/**")
                         .hasAnyRole(RoleName.ADMIN.getRoleName())
 
@@ -197,48 +199,46 @@ public class WebSecurityConfig {
                         .hasAnyRole(RoleName.ADMIN.getRoleName(), RoleName.MANAGER.getRoleName())
                         // *****
 
-                        //order
-                        ///order/getShoppingCartTotal : unauthenticated (for all)
-                        .requestMatchers(HttpMethod.POST, "/order/getShoppingCartTotal").permitAll()
-
-                        /*For /order
+                        // order
+                        /*
+                         * For /order
                          * Aceess is restricted according to following rule
-                         * ADMIN        : VIEW, UPDATE, DELETE
-                         * MANAGER      : VIEW
-                         * Cashier      : VIEW, ADD
-                         * Customer     : VIEW, ADD
+                         * ADMIN : VIEW, UPDATE, DELETE
+                         * MANAGER : VIEW
+                         * Cashier : VIEW, ADD
+                         * Customer : VIEW, ADD
                          */
                         .requestMatchers(HttpMethod.DELETE, "/order/**")
                         .hasAnyRole(RoleName.ADMIN.getRoleName())
 
-                        .requestMatchers(HttpMethod.POST, "/order/")
+                        .requestMatchers(HttpMethod.POST, "/order/**")
                         .hasAnyRole(RoleName.CUSTOMER.getRoleName(), RoleName.CASHIER.getRoleName())
 
-                        /*For /order/updateOrderStatus
-                         * Aceess is restricted according to following rule
-                         * ADMIN        : can
-                         * MANAGER      : Can
-                         * Cashier      : Can't
-                         * Customer     : Can
-                         */
-                        .requestMatchers(HttpMethod.PUT, "/order/updateOrderStatus")
-                        .hasAnyRole(RoleName.ADMIN.getRoleName(), RoleName.MANAGER.getRoleName(), RoleName.CUSTOMER.getRoleName())
-                        
-                        .requestMatchers(HttpMethod.PUT, "/order")
+                        .requestMatchers(HttpMethod.PUT, "/order/**")
                         .hasAnyRole(RoleName.ADMIN.getRoleName())
 
-                        //get bill
-                        .requestMatchers(HttpMethod.GET, "/order/{id}/pdfOrderBill")
-                        .hasAnyRole(RoleName.ADMIN.getRoleName(), RoleName.MANAGER.getRoleName(), RoleName.CASHIER.getRoleName())
+                        /*
+                         * For /trade
+                        */
+                        //trade status update
+                        .requestMatchers(HttpMethod.PUT, "/trade/**")
+                        .hasAnyRole(RoleName.ADMIN.getRoleName(), RoleName.MANAGER.getRoleName(),
+                                RoleName.CUSTOMER.getRoleName())
+
+                        // get bill
+                        .requestMatchers(HttpMethod.GET, "/trade/**")
+                        .hasAnyRole(RoleName.ADMIN.getRoleName(), RoleName.MANAGER.getRoleName(),
+                                RoleName.CASHIER.getRoleName())
                         // *****
 
                         // Access is unauthenticated (for all)
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/uploads/***").permitAll() //image file saving directory
+                        .requestMatchers("/uploads/***").permitAll() // image file saving directory
                         .requestMatchers(HttpMethod.GET, "/category/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/subCategory/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/author/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/book/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/trade/getShoppingCartTotal").permitAll()
                         // *****
 
                         .anyRequest().authenticated()); // Authenticate all other requests
