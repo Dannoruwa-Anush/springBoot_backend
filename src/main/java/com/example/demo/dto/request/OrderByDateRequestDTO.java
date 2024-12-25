@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data // generate Getters and Setters using Lombok
 public class OrderByDateRequestDTO {
-
+    //DTO specifies exactly what fields should be serialized.
     private LocalDate checkedDate; //format: yyyy-MM-dd
 
     private OrderStatus checkedStatus;
