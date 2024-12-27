@@ -1,0 +1,29 @@
+# Ignore Maven build directories
+/target
+
+# Ignore IDE-specific directories and files
+/.idea
+/.vscode
+/.eclipse
+*.iml
+
+# Ignore logs
+*.log
+/logs
+
+# Ignore source control files (git)
+.git
+.gitignore
+
+# Ignore temporary files
+.DS_Store
+*.swp
+*.swo
+
+# Ignore files related to local environments
+*.local
+*.env
+
+# Ignore Dockerfile itself (optional, if you don't want Dockerfile in the image)
+Dockerfile
+.dockerignore
