@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  app:
+    image: dannoruwaanush/netcentric-spring-boot-app  #dockerusername/image-name
+    ports:
+      - "9090:9090"  # Expose the port on your local machine
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/netCentricDemo_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ""  # Leave empty if no password is set
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  db:
+    image: mysql:8.0
+    container_name: mysql-container
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes" 
+      MYSQL_DATABASE: netCentricDemo_db
+    ports:
+      - "3306:3306"  # Expose MySQL port to your host machine
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - app-network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin-container
+    environment:
+      PMA_HOST: db  # This tells PHPMyAdmin to connect to the 'db' container
+      PMA_PORT: 3306
+    ports:
+      - "80:80"  # Expose PHPMyAdmin on port 80 on your localhost
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+volumes:
+  db-data:
+
+networks:
+  app-network:
+    driver: bridge

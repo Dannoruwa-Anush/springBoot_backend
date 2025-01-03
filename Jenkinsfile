@@ -33,6 +33,15 @@ pipeline {
             }
         }
 
+        stage('Start Application with Docker Compose') {
+            steps {
+                script {
+                    // Start the Spring Boot app and MySQL using Docker Compose
+                    bat 'docker-compose up -d'
+                }
+            }
+        }
+        
         stage('Push Docker Image') {
             steps {
                 script {
